@@ -41,36 +41,62 @@ public class AiControllerUnit : Unit
     private bool HasPlayerInLineOfSight(out Vector2Int playerPosition)
     {
         playerPosition = GameManager.Instance.CurrentPlayer.CurrentPosition;
-        return false;
+
+        Vector2Int checkedPosition = CurrentPosition;
+
+        while (true)
+        {
+            if (playerPosition == checkedPosition)
+            {
+                Debug.Log("has line of sight");
+
+                return true;
+            }
+
+            if (!GameManager.Instance.CurrentLevel.IsWalkable(checkedPosition))
+            {
+                Debug.Log("does not have line of sight");
+
+                return false;
+            }
+
+            Vector2Int diff = playerPosition - checkedPosition;
+
+            var deltaX = Mathf.Abs(diff.x);
+            var deltaY = Mathf.Abs(diff.y);
+
+            var moveX = checkedPosition.x >= playerPosition.x ? -1 : 1;
+            var moveY = checkedPosition.y >= playerPosition.y ? -1 : 1;
+
+            if (deltaX > deltaY)
+            {
+                checkedPosition += new Vector2Int(moveX, 0);
+            }
+            else
+            {
+                checkedPosition += new Vector2Int(0, moveY);
+            }
+        }
+
     }
 
     private void Intercept(Vector2Int playerPosition)
     {
         Vector2Int diff = playerPosition - CurrentPosition;
-        // x is vertical
-        // y is horizontal
-        // (0,0) = top left
-        if (diff.x != 0 && diff.x > diff.y)
+
+        var deltaX = Mathf.Abs(diff.x);
+        var deltaY = Mathf.Abs(diff.y);
+
+        var moveX = CurrentPosition.x >= playerPosition.x ? -1 : 1;
+        var moveY = CurrentPosition.y >= playerPosition.y ? -1 : 1;
+
+        if (deltaX > deltaY)
         {
-            if (diff.x > 0)
-            {
-                SubmitMoveAction(CurrentPosition);
-            }
-            else
-            {
-                SubmitMoveAction(CurrentPosition);
-            }
+            SubmitMoveAction(new Vector2Int(moveX, 0));
         }
-        else if (diff.y != 0 && diff.y > diff.x)
+        else
         {
-            if (diff.y > 0)
-            {
-                SubmitMoveAction(CurrentPosition);
-            }
-            else
-            {
-                SubmitMoveAction(CurrentPosition);
-            }
+            SubmitMoveAction(new Vector2Int(0, moveY));
         }
     }
 
