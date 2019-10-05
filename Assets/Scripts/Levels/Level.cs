@@ -48,6 +48,43 @@ public class Level : ILevel
 
     #region Generator
 
+    List<BSPNode> GetSubtreeLeafs(BSPNode node)
+    {
+        List<BSPNode> result = new List<BSPNode>();
+
+        Stack<BSPNode> stack = new Stack<BSPNode>();
+        stack.Push(node);
+
+        while (stack.Count > 0)
+        {
+            BSPNode n = stack.Pop();
+
+            if (n.isLeaf)
+            {
+                result.Add(n);
+            }
+            else
+            {
+                if (n.children[0] != null)
+                {
+                    stack.Push(n.children[0]);
+                }
+
+                if (n.children[1] != null)
+                {
+                    stack.Push(n.children[1]);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    void FindClosestNodes(List<BSPNode> nodes, ref BSPNode left, ref BSPNode right)
+    {
+
+    }
+
     void BuildCorridor(Vector2Int entrance, Vector2Int exit, int axis)
     {
         Vector2Int distance = new Vector2Int(exit.x - entrance.x, exit.y - entrance.y);
@@ -120,7 +157,7 @@ public class Level : ILevel
                 {
                     int begin = node.children[0].realMin.y + 1;
                     int end = node.children[0].realMax.y - 1;
-                    int position = UnityEngine.Random.Range(begin, end + 1);
+                    int position = UnityEngine.Random.Range(begin, end);
 
                     Vector2Int entrance = new Vector2Int(node.children[0].realMax.x - 1, position);
 
@@ -128,7 +165,7 @@ public class Level : ILevel
 
                     begin = node.children[1].realMin.y + 1;
                     end = node.children[1].realMax.y - 1;
-                    position = UnityEngine.Random.Range(begin, end + 1);
+                    position = UnityEngine.Random.Range(begin, end);
 
                     Vector2Int exit = new Vector2Int(node.children[1].realMin.x, position);
 
