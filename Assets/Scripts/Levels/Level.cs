@@ -4,10 +4,12 @@ using UnityEngine;
 
 public enum CellType : byte
 {
-    EMPTY = (byte)' ',
+    Empty = (byte)' ',
     Wall = (byte)'#',
     Floor = (byte)'.',
-    Corridor = (byte)'|'
+    Corridor = (byte)'|',
+    Entrance = (byte)'E',
+    Exit = (byte)'X'
 }
 
 public enum ActionType
@@ -56,13 +58,84 @@ public class Level : ILevel
 
     #region Generator
 
+    private CellType SafeLook(int i, int j)
+    {
+        if (i < 0)
+        {
+            i = 0;
+        }
+
+        if (j < 0)
+        {
+            j = 0;
+        }
+
+        if (i >= Size)
+        {
+            i = Size - 1;
+        }
+
+        if (j >= Size)
+        {
+            j = Size - 1;
+        }
+
+        return Map[i, j];
+    }
+    private void GenerateEntrance()
+    {
+        List<Vector2Int> candidates = new List<Vector2Int>();
+
+        for (int i = 0; i < Size; i++)
+        {
+            for (int j = 0; j < Size; j++)
+            {
+                if (SafeLook(i, j) == CellType.Wall &&
+                    (SafeLook(i + 1, j) == CellType.Floor ||
+                    SafeLook(i, j + 1) == CellType.Floor ||
+                    SafeLook(i - 1, j) == CellType.Floor ||
+                    SafeLook(i, j - 1) == CellType.Floor))
+                {
+                    candidates.Add(new Vector2Int(i, j));
+                }
+            }
+        }
+
+        int entrance = UnityEngine.Random.Range(0, candidates.Count);
+
+        Map[candidates[entrance].x, candidates[entrance].y] = CellType.Entrance;
+    }
+    private void GenerateExit()
+    {
+        List<Vector2Int> candidates = new List<Vector2Int>();
+
+        for (int i = 0; i < Size; i++)
+        {
+            for (int j = 0; j < Size; j++)
+            {
+                if (SafeLook(i, j) == CellType.Wall &&
+                    (SafeLook(i + 1, j) == CellType.Floor ||
+                    SafeLook(i, j + 1) == CellType.Floor ||
+                    SafeLook(i - 1, j) == CellType.Floor ||
+                    SafeLook(i, j - 1) == CellType.Floor))
+                {
+                    candidates.Add(new Vector2Int(i, j));
+                }
+            }
+        }
+
+        int exit = UnityEngine.Random.Range(0, candidates.Count);
+
+        Map[candidates[exit].x, candidates[exit].y] = CellType.Exit;
+    }
+
     private void BuildCorridorWalls()
     {
         for (int i = 0; i < Size; i++)
         {
             for (int j = 0; j < Size; j++)
             {
-                if (Map[i, j] == CellType.EMPTY)
+                if (Map[i, j] == CellType.Empty)
                 {
                     bool corridorWall = false;
 
@@ -212,7 +285,7 @@ public class Level : ILevel
                         {
                             if (x + i >= 0 && x + i < Size && y + j >= 0 && y + j < Size)
                             {
-                                if (Map[x + i, y + j] == CellType.EMPTY)
+                                if (Map[x + i, y + j] == CellType.Empty)
                                 {
                                     Map[x + i, y + j] = CellType.Corridor;
                                 }
@@ -228,7 +301,7 @@ public class Level : ILevel
                         {
                             if (x + i >= 0 && x + i < Size && y + j >= 0 && y + j < Size)
                             {
-                                if (Map[x + i, y + j] == CellType.EMPTY)
+                                if (Map[x + i, y + j] == CellType.Empty)
                                 {
                                     Map[x + i, y + j] = CellType.Corridor;
                                 }
@@ -464,7 +537,7 @@ public class Level : ILevel
         {
             for (int j = 0; j < Size; j++)
             {
-                Map[i, j] = CellType.EMPTY;
+                Map[i, j] = CellType.Empty;
             }
         }
 
@@ -494,13 +567,16 @@ public class Level : ILevel
             {
                 if (i == 0 || j == 0 || i == (Size - 1) || j == (Size - 1))
                 {
-                    if (Map[i, j] != CellType.EMPTY)
+                    if (Map[i, j] != CellType.Empty)
                     {
                         Map[i, j] = CellType.Wall;
                     }
                 }
             }
         }
+
+        GenerateEntrance();
+        GenerateExit();
     }
 
     #endregion

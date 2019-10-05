@@ -9,6 +9,8 @@ public class WorldGenerator : Singleton<WorldGenerator>
 
     public GameObject FloorPrefab;
     public GameObject WallPrefab;
+    public GameObject EntrancePrefab;
+    public GameObject ExitPrefab;
 
     public Unit Enemy01;
 
@@ -57,6 +59,10 @@ public class WorldGenerator : Singleton<WorldGenerator>
                 return FloorPrefab;
             case CellType.Wall:
                 return WallPrefab;
+            case CellType.Entrance:
+                return EntrancePrefab;
+            case CellType.Exit:
+                return ExitPrefab;
         }
         return null;
     }

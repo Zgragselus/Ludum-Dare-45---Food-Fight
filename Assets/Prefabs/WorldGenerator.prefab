@@ -49,4 +49,8 @@ MonoBehaviour:
     type: 3}
   WallPrefab: {fileID: 2904551457251249523, guid: 0fa3ad57fa233d247aed51cbeb57b7c2,
     type: 3}
+  EntrancePrefab: {fileID: 2904551457251249523, guid: 9a0c89c500649384f871891f12af6144,
+    type: 3}
+  ExitPrefab: {fileID: 2904551457251249523, guid: 755e0b471d36e6f4588d698638e6028d,
+    type: 3}
   Enemy01: {fileID: 2037282259346413277, guid: 754ec979c1f7a0f4cba26a3278c24dca, type: 3}
