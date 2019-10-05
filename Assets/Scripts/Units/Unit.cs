@@ -1,8 +1,9 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class Unit : MonoBehaviour
+public abstract class Unit : MonoBehaviour, ILevelObject
 {
     public int Health;
 
@@ -13,6 +14,8 @@ public abstract class Unit : MonoBehaviour
     public int Experience;
 
     public Vector2Int CurrentPosition;
+
+    public Vector2Int CurrentDirection;
 
     protected bool TryMove(Vector2Int direction)
     {
@@ -26,9 +29,14 @@ public abstract class Unit : MonoBehaviour
         if (GameManager.Instance.CurrentLevel.Move(CurrentPosition, newPosition))
         {
             CurrentPosition = newPosition;
+            transform.position = new Vector3(newPosition.x, 0, newPosition.y);
             return true;
         }
 
         return false;
+    }
+
+    public virtual void Tick()
+    {
     }
 }

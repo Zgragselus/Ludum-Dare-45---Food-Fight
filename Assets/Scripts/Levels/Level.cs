@@ -12,6 +12,8 @@ public enum CellType : byte
     CORRIDOR = (byte)'|'
 }
 
+public interface ILevelObject { }
+
 public class BSPNode
 {
     public int split;
@@ -42,6 +44,7 @@ public class BSPNode
 public class Level : ILevel
 {
     public CellType[,] Map;
+    public ILevelObject[,] Objects;
     public int Size;
     int minRoomSize;
     int maxDepth;
@@ -409,6 +412,7 @@ public class Level : ILevel
         minRoomSize = 5;
 
         Map = new CellType[Size, Size];
+        Objects = new ILevelObject[Size, Size];
 
         maxDepth = Log2Int(Size) - 4;
 
@@ -433,6 +437,17 @@ public class Level : ILevel
 
     #endregion
 
+    public void AddPlayer(Player player, Vector2Int pos)
+    {
+        if (!IsWalkable(pos) || IsOccupiedByUnit(pos))
+        {
+            throw new InvalidOperationException("Cannot move player to the given position.");
+        }
+        Objects[pos.x, pos.y] = player;
+        player.CurrentPosition = pos;
+        player.CurrentDirection = Vector2Int.right;
+    }
+
     public bool Move(Vector2Int from, Vector2Int to)
     {
         return IsWalkable(to);
@@ -445,6 +460,8 @@ public class Level : ILevel
         Vector2Int.up,
         Vector2Int.down,
     };
+
+    public List<Unit> Units = new List<Unit>();
 
     public int GetNeighbours(Vector2Int pos, in Span<Vector2Int> neighbours)
     {
@@ -475,7 +492,7 @@ public class Level : ILevel
 
     public bool IsOccupiedByUnit(Vector2Int pos)
     {
-        return false;
+        return Objects[pos.x, pos.y] is Unit;
     }
 
     public bool HasPickableItemAt(Vector2Int pos)

@@ -6,10 +6,10 @@ using Random = UnityEngine.Random;
 
 public class AiControllerUnit : Unit
 {
-    public Vector2Int CurrentDirection;
-
-    private void Update()
+    public override void Tick()
     {
+        base.Tick();
+
         if (IsFacingObstacle())
         {
             TurnToAvailableDirection();
@@ -30,7 +30,7 @@ public class AiControllerUnit : Unit
         Span<Vector2Int> neighbours = stackalloc Vector2Int[4];
         int count = GameManager.Instance.CurrentLevel.GetNeighbours(CurrentPosition, in neighbours);
         // turn to random non-blocked direction
-        CurrentDirection = CurrentPosition - neighbours[Random.Range(0, count)];
+        CurrentDirection = neighbours[Random.Range(0, count)] - CurrentPosition;
     }
 
     private bool IsFacingObstacle()
@@ -54,22 +54,22 @@ public class AiControllerUnit : Unit
         {
             if (diff.x > 0)
             {
-                TryMove(CurrentPosition + Vector2Int.down);
+                TryMove(CurrentPosition);
             }
             else
             {
-                TryMove(CurrentPosition + Vector2Int.up);
+                TryMove(CurrentPosition);
             }
         }
         else if (diff.y != 0 && diff.y > diff.x)
         {
             if (diff.y > 0)
             {
-                TryMove(CurrentPosition + Vector2Int.right);
+                TryMove(CurrentPosition);
             }
             else
             {
-                TryMove(CurrentPosition + Vector2Int.left);
+                TryMove(CurrentPosition);
             }
         }
     }
