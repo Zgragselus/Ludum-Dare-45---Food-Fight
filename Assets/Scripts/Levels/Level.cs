@@ -48,6 +48,52 @@ public class Level : ILevel
 
     #region Generator
 
+    void BuildCorridorWalls()
+    {
+        for (int i = 0; i < Size; i++)
+        {
+            for (int j = 0; j < Size; j++)
+            {
+                if (Map[i, j] == CellType.EMPTY)
+                {
+                    bool corridorWall = false;
+
+                    for (int k = -1; k <= 1; k++)
+                    {
+                        for (int l = -1; l <= 1; l++)
+                        {
+                            if (i + k >= 0 && i + k < Size && j + l >= 0 && j + l < Size)
+                            {
+                                if (Map[i + k, j + l] == CellType.CORRIDOR)
+                                {
+                                    corridorWall = true;
+                                }
+                            }
+                        }
+                    }
+
+                    if (corridorWall)
+                    {
+                        Map[i, j] = CellType.WALL;
+                    }
+                }
+            }
+        }
+    }
+    void BuildCorridorFloors()
+    {
+        for (int i = 0; i < Size; i++)
+        {
+            for (int j = 0; j < Size; j++)
+            {
+                if (Map[i, j] == CellType.CORRIDOR)
+                {
+                    Map[i, j] = CellType.FLOOR;
+                }
+            }
+        }
+    }
+
     List<BSPNode> GetSubtreeLeafs(BSPNode node)
     {
         List<BSPNode> result = new List<BSPNode>();
@@ -80,9 +126,29 @@ public class Level : ILevel
         return result;
     }
 
-    void FindClosestNodes(List<BSPNode> nodes, ref BSPNode left, ref BSPNode right)
+    void FindClosestNodes(List<BSPNode> left, List<BSPNode> right, ref int first, ref int second)
     {
+        float minDistance = 999999.9f;
+        first = -1;
+        second = -1;
 
+        for (int i = 0; i < left.Count; i++)
+        {
+            for (int j = 0; j < right.Count; j++)
+            {
+                Vector2Int l = new Vector2Int((left[i].realMin.x + left[i].realMax.x) / 2, (left[i].realMin.y + left[i].realMax.y) / 2);
+                Vector2Int r = new Vector2Int((right[j].realMin.x + right[j].realMax.x) / 2, (right[j].realMin.y + right[j].realMax.y) / 2);
+
+                Vector2Int diff = r - l;
+
+                if (diff.magnitude < minDistance)
+                {
+                    first = i;
+                    second = j;
+                    minDistance = diff.magnitude;
+                }
+            }
+        }
     }
 
     void BuildCorridor(Vector2Int entrance, Vector2Int exit, int axis)
@@ -151,52 +217,53 @@ public class Level : ILevel
                 RecursiveConnect(node.children[1]);
             }
 
-            if (node.children[0].isLeaf && node.children[1].isLeaf)
+            List<BSPNode> nodesLeft = GetSubtreeLeafs(node.children[0]);
+            List<BSPNode> nodesRight = GetSubtreeLeafs(node.children[1]);
+
+            int entranceID = -1;
+            int exitID = -1;
+
+            FindClosestNodes(nodesLeft, nodesRight, ref entranceID, ref exitID);
+
+            if (node.axis == 0)
             {
-                if (node.axis == 0)
-                {
-                    int begin = node.children[0].realMin.y + 1;
-                    int end = node.children[0].realMax.y - 1;
-                    int position = UnityEngine.Random.Range(begin, end);
+                int begin = nodesLeft[entranceID].realMin.y + 1;
+                int end = nodesLeft[entranceID].realMax.y - 1;
+                int position = UnityEngine.Random.Range(begin, end);
 
-                    Vector2Int entrance = new Vector2Int(node.children[0].realMax.x - 1, position);
+                Vector2Int entrance = new Vector2Int(nodesLeft[entranceID].realMax.x - 1, position);
 
-                    Map[entrance.x, entrance.y] = CellType.CORRIDOR;
+                Map[entrance.x, entrance.y] = CellType.CORRIDOR;
 
-                    begin = node.children[1].realMin.y + 1;
-                    end = node.children[1].realMax.y - 1;
-                    position = UnityEngine.Random.Range(begin, end);
+                begin = nodesRight[exitID].realMin.y + 1;
+                end = nodesRight[exitID].realMax.y - 1;
+                position = UnityEngine.Random.Range(begin, end);
 
-                    Vector2Int exit = new Vector2Int(node.children[1].realMin.x, position);
+                Vector2Int exit = new Vector2Int(nodesRight[exitID].realMin.x, position);
 
-                    Map[exit.x, exit.y] = CellType.CORRIDOR;
+                Map[exit.x, exit.y] = CellType.CORRIDOR;
 
-                    BuildCorridor(entrance, exit, node.axis);
-                }
-                else
-                {
-                    int begin = node.children[0].realMin.x + 1;
-                    int end = node.children[0].realMax.x - 1;
-                    int position = UnityEngine.Random.Range(begin, end + 1);
-
-                    Vector2Int entrance = new Vector2Int(position, node.children[0].realMax.y - 1);
-
-                    Map[entrance.x, entrance.y] = CellType.CORRIDOR;
-
-                    begin = node.children[1].realMin.x + 1;
-                    end = node.children[1].realMax.x - 1;
-                    position = UnityEngine.Random.Range(begin, end + 1);
-
-                    Vector2Int exit = new Vector2Int(position, node.children[1].realMin.y);
-
-                    Map[exit.x, exit.y] = CellType.CORRIDOR;
-
-                    BuildCorridor(entrance, exit, node.axis);
-                }
+                BuildCorridor(entrance, exit, node.axis);
             }
             else
             {
+                int begin = nodesLeft[entranceID].realMin.x + 1;
+                int end = nodesLeft[entranceID].realMax.x - 1;
+                int position = UnityEngine.Random.Range(begin, end);
 
+                Vector2Int entrance = new Vector2Int(position, nodesLeft[entranceID].realMax.y - 1);
+
+                Map[entrance.x, entrance.y] = CellType.CORRIDOR;
+
+                begin = nodesRight[exitID].realMin.x + 1;
+                end = nodesRight[exitID].realMax.x - 1;
+                position = UnityEngine.Random.Range(begin, end);
+
+                Vector2Int exit = new Vector2Int(position, nodesRight[exitID].realMin.y);
+
+                Map[exit.x, exit.y] = CellType.CORRIDOR;
+
+                BuildCorridor(entrance, exit, node.axis);
             }
 
             node.isConnected = true;
@@ -358,6 +425,10 @@ public class Level : ILevel
         RecursiveFill(root);
 
         RecursiveConnect(root);
+
+        BuildCorridorWalls();
+
+        BuildCorridorFloors();
     }
 
     #endregion
