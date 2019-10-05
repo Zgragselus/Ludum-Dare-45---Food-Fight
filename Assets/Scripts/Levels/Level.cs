@@ -160,7 +160,7 @@ public class Level : ILevel
         }
     }
 
-    private void BuildCorridor(Vector2Int entrance, Vector2Int exit, int axis)
+    private void BuildCorridor(Vector2Int entrance, Vector2Int exit, int axis, int maxWidth)
     {
         Vector2Int distance = new Vector2Int(exit.x - entrance.x, exit.y - entrance.y);
 
@@ -180,6 +180,8 @@ public class Level : ILevel
 
         int x = entrance.x;
         int y = entrance.y;
+        Map[x, y] = CellType.Corridor;
+
         int current = 1;
         while (current != 4)
         {
@@ -202,10 +204,43 @@ public class Level : ILevel
                     y--;
                 }
 
-                Map[x, y] = CellType.Corridor;
+                if (maxWidth < 0)
+                {
+                    for (int i = maxWidth; i < -maxWidth; i++)
+                    {
+                        for (int j = maxWidth; j < -maxWidth; j++)
+                        {
+                            if (x + i >= 0 && x + i < Size && y + j >= 0 && y + j < Size)
+                            {
+                                if (Map[x + i, y + j] == CellType.EMPTY)
+                                {
+                                    Map[x + i, y + j] = CellType.Corridor;
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    for (int i = -maxWidth; i <= maxWidth; i++)
+                    {
+                        for (int j = -maxWidth; j <= maxWidth; j++)
+                        {
+                            if (x + i >= 0 && x + i < Size && y + j >= 0 && y + j < Size)
+                            {
+                                if (Map[x + i, y + j] == CellType.EMPTY)
+                                {
+                                    Map[x + i, y + j] = CellType.Corridor;
+                                }
+                            }
+                        }
+                    }
+                }
             }
             current++;
         }
+
+        Map[x, y] = CellType.Corridor;
     }
 
     private void RecursiveConnect(BSPNode node)
@@ -232,6 +267,8 @@ public class Level : ILevel
             int entranceID = -1;
             int exitID = -1;
 
+            int corridorWidth = UnityEngine.Random.Range(-1, 2);
+
             FindClosestNodes(nodesLeft, nodesRight, ref entranceID, ref exitID);
 
             if (node.axis == 0)
@@ -252,7 +289,7 @@ public class Level : ILevel
 
                 Map[exit.x, exit.y] = CellType.Corridor;
 
-                BuildCorridor(entrance, exit, node.axis);
+                BuildCorridor(entrance, exit, node.axis, corridorWidth);
             }
             else
             {
@@ -272,7 +309,7 @@ public class Level : ILevel
 
                 Map[exit.x, exit.y] = CellType.Corridor;
 
-                BuildCorridor(entrance, exit, node.axis);
+                BuildCorridor(entrance, exit, node.axis, corridorWidth);
             }
 
             node.isConnected = true;
@@ -421,7 +458,7 @@ public class Level : ILevel
         ObjectsNext = new ILevelObject[Size, Size];
         ObjectsCurrent = new ILevelObject[Size, Size];
 
-        _maxDepth = Log2Int(Size) - 4;
+        _maxDepth = Log2Int(Size) - 3;
 
         for (int i = 0; i < Size; i++)
         {
@@ -437,9 +474,33 @@ public class Level : ILevel
 
         RecursiveConnect(root);
 
+        for (int i = 0; i < Size; i++)
+        {
+            string s = "";
+            for (int j = 0; j < Size; j++)
+            {
+                s += (char)Map[i, j];
+            }
+            Debug.Log(s);
+        }
+
         BuildCorridorWalls();
 
         BuildCorridorFloors();
+
+        for (int i = 0; i < Size; i++)
+        {
+            for (int j = 0; j < Size; j++)
+            {
+                if (i == 0 || j == 0 || i == (Size - 1) || j == (Size - 1))
+                {
+                    if (Map[i, j] != CellType.EMPTY)
+                    {
+                        Map[i, j] = CellType.Wall;
+                    }
+                }
+            }
+        }
     }
 
     #endregion
