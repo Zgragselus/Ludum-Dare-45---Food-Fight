@@ -35,9 +35,4 @@ public class Player : Unit
             GameManager.Instance.StepCurrentLevel();
         }
     }
-
-    public void UpdatePosition()
-    {
-        transform.position = new Vector3(CurrentPosition.x, 0, CurrentPosition.y);
-    }
 }

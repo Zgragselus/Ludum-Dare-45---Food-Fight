@@ -47,7 +47,7 @@ public class GameManager : Singleton<GameManager>
             {
                 var player = WorldGenerator.Instance.CreatePlayer();
                 CurrentLevel.AddPlayer(player, neighbours[0]);
-                player.UpdatePosition();
+                player.transform.position = new Vector3(player.CurrentPosition.x, 0, player.CurrentPosition.y);
                 _cam.GetComponent<FollowingCamera>().Target = player.transform;
                 CurrentPlayer = player;
             }

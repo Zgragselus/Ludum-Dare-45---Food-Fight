@@ -690,8 +690,15 @@ public class Level : ILevel
         if (_actionsToDo.TryGetValue(GameManager.Instance.CurrentPlayer, out var playerTransition))
         {
             var otherUnit = Units[playerTransition.to.x, playerTransition.to.y];
+            // we want to move somewhere we can't walk; just idle
+            if (!IsWalkable(playerTransition.to))
+            {
+                results.Add((GameManager.Instance.CurrentPlayer, playerTransition.from, ActionType.Wait, null));
+
+                tempUnits[playerTransition.from.x, playerTransition.from.y] = GameManager.Instance.CurrentPlayer;
+            }
             // we want to move to an empty space
-            if (otherUnit == null)
+            else if (otherUnit == null)
             {
                 results.Add((GameManager.Instance.CurrentPlayer, playerTransition.to, ActionType.Move, null));
 

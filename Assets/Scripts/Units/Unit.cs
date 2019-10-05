@@ -19,13 +19,11 @@ public abstract class Unit : MonoBehaviour, ILevelObject
 
     public bool IsDead => Health == 0;
 
-    protected bool SubmitMoveAction(Vector2Int direction)
+    protected void SubmitMoveAction(Vector2Int direction)
     {
         var newPosition = CurrentPosition + direction;
 
         GameManager.Instance.CurrentLevel.RegisterAction(this, CurrentPosition, newPosition);
-
-        return false;
     }
 
     /// <summary>
