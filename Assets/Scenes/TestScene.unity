@@ -198,7 +198,7 @@ GameObject:
   - component: {fileID: 41107554}
   - component: {fileID: 41107553}
   m_Layer: 5
-  m_Name: Text
+  m_Name: DebugText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -421,7 +421,7 @@ GameObject:
   - component: {fileID: 1161572587}
   - component: {fileID: 1161572586}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: Managers
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -436,10 +436,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 1161572585}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e5cbe6d7be7897345bc0842b904d6d6d, type: 3}
+  m_Script: {fileID: 11500000, guid: f632a323c0509a548a10c53b4543d191, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  text: {fileID: 41107553}
 --- !u!4 &1161572587
 Transform:
   m_ObjectHideFlags: 0

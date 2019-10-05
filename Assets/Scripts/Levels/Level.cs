@@ -39,14 +39,14 @@ public class BSPNode
     }
 }
 
-public class Level : MonoBehaviour, ILevel
+public class Level : ILevel
 {
-    CellType[][] map;
-    int size;
+    public CellType[,] Map;
+    public int Size;
     int minRoomSize;
     int maxDepth;
 
-    public Text text;
+    #region Generator
 
     void BuildCorridor(Vector2Int entrance, Vector2Int exit, int axis)
     {
@@ -90,9 +90,9 @@ public class Level : MonoBehaviour, ILevel
                     y--;
                 }
 
-                map[x][y] = CellType.CORRIDOR;
+                Map[x, y] = CellType.CORRIDOR;
             }
-             current++;
+            current++;
         }
     }
 
@@ -110,7 +110,7 @@ public class Level : MonoBehaviour, ILevel
             }
 
             if (!node.children[1].isConnected)
-            { 
+            {
                 RecursiveConnect(node.children[1]);
             }
 
@@ -124,15 +124,15 @@ public class Level : MonoBehaviour, ILevel
 
                     Vector2Int entrance = new Vector2Int(node.children[0].realMax.x - 1, position);
 
-                    map[entrance.x][entrance.y] = CellType.CORRIDOR;
-                    
+                    Map[entrance.x, entrance.y] = CellType.CORRIDOR;
+
                     begin = node.children[1].realMin.y + 1;
                     end = node.children[1].realMax.y - 1;
                     position = UnityEngine.Random.Range(begin, end + 1);
 
                     Vector2Int exit = new Vector2Int(node.children[1].realMin.x, position);
 
-                    map[exit.x][exit.y] = CellType.CORRIDOR;
+                    Map[exit.x, exit.y] = CellType.CORRIDOR;
 
                     BuildCorridor(entrance, exit, node.axis);
                 }
@@ -144,7 +144,7 @@ public class Level : MonoBehaviour, ILevel
 
                     Vector2Int entrance = new Vector2Int(position, node.children[0].realMax.y - 1);
 
-                    map[entrance.x][entrance.y] = CellType.CORRIDOR;
+                    Map[entrance.x, entrance.y] = CellType.CORRIDOR;
 
                     begin = node.children[1].realMin.x + 1;
                     end = node.children[1].realMax.x - 1;
@@ -152,7 +152,7 @@ public class Level : MonoBehaviour, ILevel
 
                     Vector2Int exit = new Vector2Int(position, node.children[1].realMin.y);
 
-                    map[exit.x][exit.y] = CellType.CORRIDOR;
+                    Map[exit.x, exit.y] = CellType.CORRIDOR;
 
                     BuildCorridor(entrance, exit, node.axis);
                 }
@@ -203,11 +203,11 @@ public class Level : MonoBehaviour, ILevel
                 {
                     if (i == node.realMin.x || j == node.realMin.y || i == (node.realMax.x - 1) || j == (node.realMax.y - 1))
                     {
-                        map[i][j] = CellType.WALL;
+                        Map[i, j] = CellType.WALL;
                     }
                     else
                     {
-                        map[i][j] = CellType.FLOOR;
+                        Map[i, j] = CellType.FLOOR;
                     }
                 }
             }
@@ -297,71 +297,86 @@ public class Level : MonoBehaviour, ILevel
         return log;
     }
 
-    void Generate()
+    internal void Generate()
     {
         // Alloc
-        size = 64;
+        Size = 64;
 
         minRoomSize = 5;
 
-        map = new CellType[size][];
-        for (int i = 0; i < size; i++)
-        {
-            map[i] = new CellType[size];
-        }
+        Map = new CellType[Size, Size];
 
-        maxDepth = Log2Int(size) - 4;
+        maxDepth = Log2Int(Size) - 4;
 
-        for (int i = 0; i < size; i++)
+        for (int i = 0; i < Size; i++)
         {
-            for (int j = 0; j < size; j++)
+            for (int j = 0; j < Size; j++)
             {
-                map[i][j] = CellType.EMPTY;
+                Map[i, j] = CellType.EMPTY;
             }
         }
 
-        BSPNode root = RecursiveBuild(new Vector2Int(0, 0), new Vector2Int(size, size), 0);
+        BSPNode root = RecursiveBuild(new Vector2Int(0, 0), new Vector2Int(Size, Size), 0);
 
         RecursiveFill(root);
 
         RecursiveConnect(root);
     }
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        Generate();
-
-        string tmp = "";
-        for (int i = 0; i < size; i++)
-        {
-            for (int j = 0; j < size; j++)
-            {
-                tmp += (char)map[i][j];
-            }
-            tmp += "\r\n";
-        }
-        text.text = tmp;
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    #endregion
 
     public bool Move(Vector2Int from, Vector2Int to)
     {
         throw new NotImplementedException();
     }
 
-    public int GetNeighbours(Vector2Int pos, ref Span<Vector2Int> neighbours)
+    private static Vector2Int[] s_neighbourOffsets = new Vector2Int[]
     {
-        throw new NotImplementedException();
+        Vector2Int.left,
+        Vector2Int.right,
+        Vector2Int.up,
+        Vector2Int.down,
+    };
+
+    public int GetNeighbours(Vector2Int pos, in Span<Vector2Int> neighbours)
+    {
+        int validNeighbours = 0;
+        for (var i = 0; i < s_neighbourOffsets.Length; i++)
+        {
+            var offset = s_neighbourOffsets[i];
+            if (!IsInRange(pos + offset) || !IsWalkable(pos + offset))
+            {
+                continue;
+            }
+
+            neighbours[validNeighbours] = pos + offset;
+            validNeighbours++;
+        }
+        return validNeighbours;
+    }
+
+    private bool IsWalkable(Vector2Int pos)
+    {
+        return Map[pos.x, pos.y] == CellType.FLOOR || Map[pos.x, pos.y] == CellType.CORRIDOR;
+    }
+
+    private bool IsInRange(Vector2Int pos)
+    {
+        return pos.x >= 0 && pos.y >= 0 && pos.x < Map.GetLength(0) && pos.y < Map.GetLength(1);
     }
 
     public bool IsOccupiedByUnit(Vector2Int pos)
     {
-        throw new NotImplementedException();
+        return false;
+    }
+
+    public bool HasPickableItemAt(Vector2Int pos)
+    {
+        return false;
+    }
+
+    public Unit GetUnitAtPosition(Vector2Int pos)
+    {
+        return null;
     }
 }

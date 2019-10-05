@@ -5,14 +5,14 @@ using UnityEngine;
 
 public class Player : Unit
 {
-    private void Start()
-    {
-
-    }
-
     private void Update()
     {
         HandleMovementInput();
+
+        if (GameManager.Instance.CurrentLevel.HasPickableItemAt(CurrentPosition))
+        {
+            Debug.Log("pickup item");
+        }
     }
 
     private void HandleMovementInput()

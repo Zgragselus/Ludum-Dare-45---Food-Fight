@@ -6,7 +6,11 @@ public abstract class Unit : MonoBehaviour
 {
     public int Health;
 
+    public int Armor;
+
     public int Damage;
+
+    public int Experience;
 
     public Vector2Int CurrentPosition;
 
