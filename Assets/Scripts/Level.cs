@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,13 +10,6 @@ public enum CellType : byte
     WALL = (byte)'#',
     FLOOR = (byte)'.'
 }
-
-/*public interface ILevel
-{
-    public bool CanMove(Vector2Int from, Vector2Int to);
-
-    public int GetNeighbours(Vector2Int pos, ref Span<Vector2Int> neighbours);
-}*/
 
 public class BSPNode
 {
@@ -36,7 +30,7 @@ public class BSPNode
     }
 }
 
-public class Level : MonoBehaviour
+public class Level : MonoBehaviour, ILevel
 {
     CellType[][] map;
     int size;
@@ -65,12 +59,12 @@ public class Level : MonoBehaviour
             }
 
             int shrinkHorizontal = UnityEngine.Random.Range(0, shrinkWidthRange);
-            int shrinkLeft = 0;
-            int shrinkRight = 0;
+            int shrinkLeft = shrinkHorizontal / 2;
+            int shrinkRight = shrinkHorizontal / 2 + shrinkHorizontal % 2;
 
             int shrinkVertical = UnityEngine.Random.Range(0, shrinkHeightRange);
-            int shrinkDown = 0;
-            int shrinkUp = 0;
+            int shrinkDown = shrinkVertical / 2;
+            int shrinkUp = shrinkVertical / 2 + shrinkVertical % 2;
 
             Vector2Int min = new Vector2Int(node.min.x + shrinkLeft, node.min.y + shrinkDown);
             Vector2Int max = new Vector2Int(node.max.x - shrinkRight, node.max.y - shrinkUp);
@@ -141,7 +135,7 @@ public class Level : MonoBehaviour
             {
                 int range = width - 2 * minRoomSize;
                 int rand = UnityEngine.Random.Range(0, range);
-                int split = min.x + minRoomSize + rand;
+                int split = min.y + minRoomSize + rand;
 
                 Vector2Int leftMin = new Vector2Int(min.x, min.y);
                 Vector2Int leftMax = new Vector2Int(max.x, split);
@@ -220,5 +214,20 @@ public class Level : MonoBehaviour
     void Update()
     {
         
+    }
+
+    public bool Move(Vector2Int from, Vector2Int to)
+    {
+        throw new NotImplementedException();
+    }
+
+    public int GetNeighbours(Vector2Int pos, ref Span<Vector2Int> neighbours)
+    {
+        throw new NotImplementedException();
+    }
+
+    public bool IsOccupiedByUnit(Vector2Int pos)
+    {
+        throw new NotImplementedException();
     }
 }
