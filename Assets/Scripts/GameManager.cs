@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -56,20 +57,47 @@ public class GameManager : Singleton<GameManager>
 
     public void StepCurrentLevel()
     {
+        var results = new List<(Unit unit, Vector2Int position, ActionType type, object payload)>();
+
         // do all regular ticks
-        foreach (var unit in CurrentLevel.Units)
+        foreach (var unit in CurrentLevel.ActiveUnits)
         {
-            unit.Tick();
+            unit.SubmitActions();
+        }
+
+        // simulate all actions - record events to play in visuals etc.
+        CurrentLevel.DoActions(results);
+
+        foreach (var waits in results.Where(x => x.type == ActionType.Wait))
+        {
+            waits.unit.Wait();
+        }
+
+        foreach (var moves in results.Where(x => x.type == ActionType.Move))
+        {
+            moves.unit.Move(moves.position);
+        }
+
+        foreach (var pickups in results.Where(x => x.type == ActionType.PickUpItem))
+        {
+            pickups.unit.Pickup();
+        }
+
+        foreach (var attacks in results.Where(x => x.type == ActionType.Attack))
+        {
+            attacks.unit.Attack();
+        }
+
+        foreach (var deaths in results.Where(x => x.type == ActionType.Die))
+        {
+            deaths.unit.Die();
         }
 
         // kill units that died this turn - since we do not have speed factor in the game, all units get a chance to do a hit even if they might die during the round
-        foreach (var unit in CurrentLevel.Units)
+        var foo = new List<Unit>(CurrentLevel.ActiveUnits);
+        foreach (var unit in foo)
         {
             unit.PostTick();
         }
-
-        var results = new List<(Unit, Vector2Int, ActionType type)>();
-
-        CurrentLevel.DoActions(results);
     }
 }

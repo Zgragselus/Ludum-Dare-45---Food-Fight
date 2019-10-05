@@ -16,6 +16,9 @@ public enum ActionType
 {
     Move,
     Attack,
+    PickUpItem,
+    Wait,
+    Die,
 }
 
 public interface ILevelObject { }
@@ -50,8 +53,9 @@ public class BSPNode
 public class Level : ILevel
 {
     public CellType[,] Map;
-    public ILevelObject[,] ObjectsCurrent;
-    public ILevelObject[,] ObjectsNext;
+    public Unit[,] Units;
+    public ILevelObject[,] Objects;
+
     public int Size;
     private int _minRoomSize;
     private int _maxDepth;
@@ -528,8 +532,8 @@ public class Level : ILevel
         _minRoomSize = 5;
 
         Map = new CellType[Size, Size];
-        ObjectsNext = new ILevelObject[Size, Size];
-        ObjectsCurrent = new ILevelObject[Size, Size];
+        Units = new Unit[Size, Size];
+        Objects = new ILevelObject[Size, Size];
 
         _maxDepth = Log2Int(Size) - 3;
 
@@ -598,20 +602,9 @@ public class Level : ILevel
         {
             throw new InvalidOperationException("Cannot move player to the given position.");
         }
-        ObjectsCurrent[pos.x, pos.y] = player;
+        Units[pos.x, pos.y] = player;
         player.CurrentPosition = pos;
         player.CurrentDirection = Vector2Int.right;
-    }
-
-    public bool Move(Vector2Int from, Vector2Int to)
-    {
-        if (IsWalkable(to))
-        {
-            ObjectsNext[to.x, to.y] = ObjectsCurrent[from.x, from.y];
-            ObjectsNext[from.x, from.y] = null;
-            return true;
-        }
-        return false;
     }
 
     private static Vector2Int[] s_neighbourOffsets = new Vector2Int[]
@@ -622,7 +615,7 @@ public class Level : ILevel
         Vector2Int.down,
     };
 
-    public List<Unit> Units = new List<Unit>();
+    public List<Unit> ActiveUnits = new List<Unit>();
 
     public int GetNeighbours(Vector2Int pos, in Span<Vector2Int> neighbours)
     {
@@ -654,16 +647,11 @@ public class Level : ILevel
     public bool IsOccupiedByUnit(Vector2Int pos, out Unit unit)
     {
         unit = null;
-        if (ObjectsCurrent[pos.x, pos.y] is Unit u)
+        if (Units[pos.x, pos.y] is Unit u)
         {
             unit = u;
         }
         return unit;
-    }
-
-    public bool HasPickableItemAt(Vector2Int pos)
-    {
-        return false;
     }
 
     public bool TryGetAnyWalkablePosition(out Vector2Int pos)
@@ -685,32 +673,109 @@ public class Level : ILevel
 
     public void Kill(Unit unit)
     {
-        ObjectsCurrent[unit.CurrentPosition.x, unit.CurrentPosition.y] = null;
-        Units.Remove(unit);
+        Units[unit.CurrentPosition.x, unit.CurrentPosition.y] = null;
+        if (ActiveUnits.Contains(unit))
+        {
+            ActiveUnits.Remove(unit);
+        }
         Debug.Log($"Killed {unit.gameObject.name}");
         GameObject.Destroy(unit.gameObject, 5);
     }
 
-    public void DoActions(List<(Unit, Vector2Int, ActionType type)> results)
+    public void DoActions(List<(Unit, Vector2Int, ActionType type, object payload)> results)
     {
+        var tempUnits = new Unit[Size, Size];
+
         // first do the player
-        if (_actionsToDo.TryGetValue(GameManager.Instance.CurrentPlayer, out var transition))
+        if (_actionsToDo.TryGetValue(GameManager.Instance.CurrentPlayer, out var playerTransition))
         {
-            
+            var otherUnit = Units[playerTransition.to.x, playerTransition.to.y];
+            // we want to move to an empty space
+            if (otherUnit == null)
+            {
+                results.Add((GameManager.Instance.CurrentPlayer, playerTransition.to, ActionType.Move, null));
+
+                tempUnits[playerTransition.to.x, playerTransition.to.y] = GameManager.Instance.CurrentPlayer;
+            }
+            // the space is occupied by some other unit; get unit and it's transition
+            else if (_actionsToDo.TryGetValue(otherUnit, out var otherTransition))
+            {
+                // we want to "switch" places => damage
+                if (otherTransition.to == playerTransition.from)
+                {
+                    results.Add((GameManager.Instance.CurrentPlayer, playerTransition.from, ActionType.Attack, otherUnit));
+                    results.Add((otherUnit, otherTransition.from, ActionType.Attack, GameManager.Instance.CurrentPlayer));
+
+                    tempUnits[playerTransition.from.x, playerTransition.from.y] = GameManager.Instance.CurrentPlayer;
+                    tempUnits[otherTransition.from.x, otherTransition.from.y] = otherUnit;
+
+                    if (GameManager.Instance.CurrentPlayer.TakeDamage(otherUnit.Damage))
+                    {
+                        results.Add((GameManager.Instance.CurrentPlayer, playerTransition.from, ActionType.Die, null));
+                    }
+
+                    if (otherUnit.TakeDamage(GameManager.Instance.CurrentPlayer.Damage))
+                    {
+                        results.Add((GameManager.Instance.CurrentPlayer, otherTransition.from, ActionType.Die, null));
+                    }
+                }
+                // move other unit, then move player to the given space
+                else
+                {
+                    results.Add((otherUnit, otherTransition.to, ActionType.Move, null));
+                    results.Add((GameManager.Instance.CurrentPlayer, playerTransition.to, ActionType.Move, null));
+
+                    tempUnits[playerTransition.to.x, playerTransition.to.y] = GameManager.Instance.CurrentPlayer;
+                    tempUnits[otherTransition.to.x, otherTransition.to.y] = otherUnit;
+                }
+
+                _actionsToDo.Remove(otherUnit);
+            }
+
+            // pick up item if there is any after moving
+            if (Objects[playerTransition.to.x, playerTransition.to.y] is ILevelObject obj)
+            {
+                results.Add((GameManager.Instance.CurrentPlayer, playerTransition.to, ActionType.PickUpItem, obj));
+
+                Objects[playerTransition.to.x, playerTransition.to.y] = null;
+            }
+
+            _actionsToDo.Remove(GameManager.Instance.CurrentPlayer);
         }
 
         // then the rest
-
-
-        var back = ObjectsCurrent;
-        ObjectsCurrent = ObjectsNext;
-        for (int i = 0; i < back.GetLength(0); i++)
+        foreach (var kv in _actionsToDo)
         {
-            for (int j = 0; j < back.GetLength(1); j++)
+            // unit wants to go to a place where player is => damage it
+            if (tempUnits[kv.Value.to.x, kv.Value.to.y] == GameManager.Instance.CurrentPlayer)
             {
-                back[i, j] = default;
+                results.Add((kv.Key, kv.Value.from, ActionType.Attack, GameManager.Instance.CurrentPlayer));
+
+                if (GameManager.Instance.CurrentPlayer.TakeDamage(kv.Key.Damage))
+                {
+                    results.Add((GameManager.Instance.CurrentPlayer, playerTransition.from, ActionType.Die, null));
+                }
+
+                tempUnits[kv.Value.from.x, kv.Value.from.y] = kv.Key;
+            }
+            // unit wants to go to a place where some unit already is => wait where you are
+            else if (tempUnits[kv.Value.to.x, kv.Value.to.y] != null)
+            {
+                results.Add((kv.Key, kv.Value.from, ActionType.Wait, null));
+
+                tempUnits[kv.Value.from.x, kv.Value.from.y] = kv.Key;
+            }
+            // unit wants to go to and empty place => just move there
+            else
+            {
+                results.Add((kv.Key, kv.Value.to, ActionType.Move, null));
+
+                tempUnits[kv.Value.to.x, kv.Value.to.y] = kv.Key;
             }
         }
-        ObjectsNext = back;
+
+        _actionsToDo.Clear();
+
+        Units = tempUnits;
     }
 }
