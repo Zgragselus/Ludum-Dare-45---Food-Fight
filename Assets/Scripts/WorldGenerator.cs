@@ -52,10 +52,10 @@ public class WorldGenerator : Singleton<WorldGenerator>
     {
         switch (type)
         {
-            case CellType.FLOOR:
-            case CellType.CORRIDOR:
+            case CellType.Floor:
+            case CellType.Corridor:
                 return FloorPrefab;
-            case CellType.WALL:
+            case CellType.Wall:
                 return WallPrefab;
         }
         return null;

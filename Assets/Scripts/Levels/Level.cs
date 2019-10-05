@@ -1,15 +1,13 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 public enum CellType : byte
 {
     EMPTY = (byte)' ',
-    WALL = (byte)'#',
-    FLOOR = (byte)'.',
-    CORRIDOR = (byte)'|'
+    Wall = (byte)'#',
+    Floor = (byte)'.',
+    Corridor = (byte)'|'
 }
 
 public interface ILevelObject { }
@@ -46,12 +44,12 @@ public class Level : ILevel
     public CellType[,] Map;
     public ILevelObject[,] Objects;
     public int Size;
-    int minRoomSize;
-    int maxDepth;
+    private int _minRoomSize;
+    private int _maxDepth;
 
     #region Generator
 
-    void BuildCorridorWalls()
+    private void BuildCorridorWalls()
     {
         for (int i = 0; i < Size; i++)
         {
@@ -67,7 +65,7 @@ public class Level : ILevel
                         {
                             if (i + k >= 0 && i + k < Size && j + l >= 0 && j + l < Size)
                             {
-                                if (Map[i + k, j + l] == CellType.CORRIDOR)
+                                if (Map[i + k, j + l] == CellType.Corridor)
                                 {
                                     corridorWall = true;
                                 }
@@ -77,27 +75,27 @@ public class Level : ILevel
 
                     if (corridorWall)
                     {
-                        Map[i, j] = CellType.WALL;
+                        Map[i, j] = CellType.Wall;
                     }
                 }
             }
         }
     }
-    void BuildCorridorFloors()
+    private void BuildCorridorFloors()
     {
         for (int i = 0; i < Size; i++)
         {
             for (int j = 0; j < Size; j++)
             {
-                if (Map[i, j] == CellType.CORRIDOR)
+                if (Map[i, j] == CellType.Corridor)
                 {
-                    Map[i, j] = CellType.FLOOR;
+                    Map[i, j] = CellType.Floor;
                 }
             }
         }
     }
 
-    List<BSPNode> GetSubtreeLeafs(BSPNode node)
+    private List<BSPNode> GetSubtreeLeafs(BSPNode node)
     {
         List<BSPNode> result = new List<BSPNode>();
 
@@ -129,7 +127,7 @@ public class Level : ILevel
         return result;
     }
 
-    void FindClosestNodes(List<BSPNode> left, List<BSPNode> right, ref int first, ref int second)
+    private void FindClosestNodes(List<BSPNode> left, List<BSPNode> right, ref int first, ref int second)
     {
         float minDistance = 999999.9f;
         first = -1;
@@ -154,7 +152,7 @@ public class Level : ILevel
         }
     }
 
-    void BuildCorridor(Vector2Int entrance, Vector2Int exit, int axis)
+    private void BuildCorridor(Vector2Int entrance, Vector2Int exit, int axis)
     {
         Vector2Int distance = new Vector2Int(exit.x - entrance.x, exit.y - entrance.y);
 
@@ -196,13 +194,13 @@ public class Level : ILevel
                     y--;
                 }
 
-                Map[x, y] = CellType.CORRIDOR;
+                Map[x, y] = CellType.Corridor;
             }
             current++;
         }
     }
 
-    void RecursiveConnect(BSPNode node)
+    private void RecursiveConnect(BSPNode node)
     {
         if (node.isLeaf)
         {
@@ -236,7 +234,7 @@ public class Level : ILevel
 
                 Vector2Int entrance = new Vector2Int(nodesLeft[entranceID].realMax.x - 1, position);
 
-                Map[entrance.x, entrance.y] = CellType.CORRIDOR;
+                Map[entrance.x, entrance.y] = CellType.Corridor;
 
                 begin = nodesRight[exitID].realMin.y + 1;
                 end = nodesRight[exitID].realMax.y - 1;
@@ -244,7 +242,7 @@ public class Level : ILevel
 
                 Vector2Int exit = new Vector2Int(nodesRight[exitID].realMin.x, position);
 
-                Map[exit.x, exit.y] = CellType.CORRIDOR;
+                Map[exit.x, exit.y] = CellType.Corridor;
 
                 BuildCorridor(entrance, exit, node.axis);
             }
@@ -256,7 +254,7 @@ public class Level : ILevel
 
                 Vector2Int entrance = new Vector2Int(position, nodesLeft[entranceID].realMax.y - 1);
 
-                Map[entrance.x, entrance.y] = CellType.CORRIDOR;
+                Map[entrance.x, entrance.y] = CellType.Corridor;
 
                 begin = nodesRight[exitID].realMin.x + 1;
                 end = nodesRight[exitID].realMax.x - 1;
@@ -264,7 +262,7 @@ public class Level : ILevel
 
                 Vector2Int exit = new Vector2Int(position, nodesRight[exitID].realMin.y);
 
-                Map[exit.x, exit.y] = CellType.CORRIDOR;
+                Map[exit.x, exit.y] = CellType.Corridor;
 
                 BuildCorridor(entrance, exit, node.axis);
             }
@@ -274,20 +272,20 @@ public class Level : ILevel
 
     }
 
-    void RecursiveFill(BSPNode node)
+    private void RecursiveFill(BSPNode node)
     {
         if (node.isLeaf)
         {
             int width = node.max.x - node.min.x;
             int height = node.max.y - node.min.y;
 
-            int shrinkWidthRange = width - minRoomSize;
+            int shrinkWidthRange = width - _minRoomSize;
             if (shrinkWidthRange < 0)
             {
                 shrinkWidthRange = 0;
             }
 
-            int shrinkHeightRange = height - minRoomSize;
+            int shrinkHeightRange = height - _minRoomSize;
             if (shrinkHeightRange < 0)
             {
                 shrinkHeightRange = 0;
@@ -310,11 +308,11 @@ public class Level : ILevel
                 {
                     if (i == node.realMin.x || j == node.realMin.y || i == (node.realMax.x - 1) || j == (node.realMax.y - 1))
                     {
-                        Map[i, j] = CellType.WALL;
+                        Map[i, j] = CellType.Wall;
                     }
                     else
                     {
-                        Map[i, j] = CellType.FLOOR;
+                        Map[i, j] = CellType.Floor;
                     }
                 }
             }
@@ -326,12 +324,12 @@ public class Level : ILevel
         }
     }
 
-    BSPNode RecursiveBuild(Vector2Int min, Vector2Int max, int depth)
+    private BSPNode RecursiveBuild(Vector2Int min, Vector2Int max, int depth)
     {
         int width = max.x - min.x;
         int height = max.y - min.y;
 
-        if (width <= minRoomSize * 2 || height <= minRoomSize * 2 || depth >= maxDepth)
+        if (width <= _minRoomSize * 2 || height <= _minRoomSize * 2 || depth >= _maxDepth)
         {
             BSPNode n = new BSPNode
             {
@@ -352,9 +350,9 @@ public class Level : ILevel
 
             if (width > height)
             {
-                int range = width - 2 * minRoomSize;
+                int range = width - 2 * _minRoomSize;
                 int rand = UnityEngine.Random.Range(0, range);
-                int split = min.x + minRoomSize + rand;
+                int split = min.x + _minRoomSize + rand;
 
                 Vector2Int leftMin = new Vector2Int(min.x, min.y);
                 Vector2Int leftMax = new Vector2Int(split, max.y);
@@ -370,9 +368,9 @@ public class Level : ILevel
             }
             else
             {
-                int range = width - 2 * minRoomSize;
+                int range = width - 2 * _minRoomSize;
                 int rand = UnityEngine.Random.Range(0, range);
-                int split = min.y + minRoomSize + rand;
+                int split = min.y + _minRoomSize + rand;
 
                 Vector2Int leftMin = new Vector2Int(min.x, min.y);
                 Vector2Int leftMax = new Vector2Int(max.x, split);
@@ -391,7 +389,7 @@ public class Level : ILevel
         }
     }
 
-    int Log2Int(int value)
+    private int Log2Int(int value)
     {
         int log = 0;
 
@@ -409,12 +407,12 @@ public class Level : ILevel
         // Alloc
         Size = 64;
 
-        minRoomSize = 5;
+        _minRoomSize = 5;
 
         Map = new CellType[Size, Size];
         Objects = new ILevelObject[Size, Size];
 
-        maxDepth = Log2Int(Size) - 4;
+        _maxDepth = Log2Int(Size) - 4;
 
         for (int i = 0; i < Size; i++)
         {
@@ -482,7 +480,7 @@ public class Level : ILevel
 
     public bool IsWalkable(Vector2Int pos)
     {
-        return Map[pos.x, pos.y] == CellType.FLOOR || Map[pos.x, pos.y] == CellType.CORRIDOR;
+        return Map[pos.x, pos.y] == CellType.Floor || Map[pos.x, pos.y] == CellType.Corridor;
     }
 
     private bool IsInRange(Vector2Int pos)
