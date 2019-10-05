@@ -9,6 +9,10 @@ public class GameManager : Singleton<GameManager>
 
     private Camera _cam;
 
+    public int LevelResolution = 64;
+    public int LevelMinRoomSize = 5;
+    public int LevelMaxDepthOffset = 3;
+
     public Player CurrentPlayer;
 
     private void Start()
@@ -19,7 +23,7 @@ public class GameManager : Singleton<GameManager>
 
         CurrentLevel = new Level();
 
-        CurrentLevel.Generate();
+        CurrentLevel.Generate(LevelResolution, LevelMinRoomSize, LevelMaxDepthOffset);
 
         for (int i = 0; i < CurrentLevel.Size; i++)
         {

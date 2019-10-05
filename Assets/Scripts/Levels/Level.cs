@@ -520,18 +520,18 @@ public class Level : ILevel
         return log;
     }
 
-    internal void Generate()
+    internal void Generate(int resolution, int minimumRoomSize, int maximumDepthOffset)
     {
         // Alloc
-        Size = 64;
+        Size = resolution;
 
-        _minRoomSize = 5;
+        _minRoomSize = minimumRoomSize;
 
         Map = new CellType[Size, Size];
         ObjectsNext = new ILevelObject[Size, Size];
         ObjectsCurrent = new ILevelObject[Size, Size];
 
-        _maxDepth = Log2Int(Size) - 3;
+        _maxDepth = Log2Int(Size) - maximumDepthOffset;
 
         for (int i = 0; i < Size; i++)
         {
