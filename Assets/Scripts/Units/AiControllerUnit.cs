@@ -6,9 +6,9 @@ using Random = UnityEngine.Random;
 
 public class AiControllerUnit : Unit
 {
-    public override void Tick()
+    public override void SubmitActions()
     {
-        base.Tick();
+        base.SubmitActions();
 
         if (IsFacingObstacle())
         {
@@ -54,28 +54,28 @@ public class AiControllerUnit : Unit
         {
             if (diff.x > 0)
             {
-                TryMove(CurrentPosition);
+                SubmitMoveAction(CurrentPosition);
             }
             else
             {
-                TryMove(CurrentPosition);
+                SubmitMoveAction(CurrentPosition);
             }
         }
         else if (diff.y != 0 && diff.y > diff.x)
         {
             if (diff.y > 0)
             {
-                TryMove(CurrentPosition);
+                SubmitMoveAction(CurrentPosition);
             }
             else
             {
-                TryMove(CurrentPosition);
+                SubmitMoveAction(CurrentPosition);
             }
         }
     }
 
     private void Wander()
     {
-        TryMove(CurrentDirection);
+        SubmitMoveAction(CurrentDirection);
     }
 }

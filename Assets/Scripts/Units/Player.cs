@@ -8,11 +8,6 @@ public class Player : Unit
     private void Update()
     {
         HandleMovementInput();
-
-        if (GameManager.Instance.CurrentLevel.HasPickableItemAt(CurrentPosition))
-        {
-            Debug.Log("pickup item");
-        }
     }
 
     private void HandleMovementInput()
@@ -34,8 +29,9 @@ public class Player : Unit
         {
             direction = Vector2Int.right;
         }
-        if (direction != Vector2Int.zero && TryMove(direction))
+        if (direction != Vector2Int.zero)
         {
+            SubmitMoveAction(direction);
             GameManager.Instance.StepCurrentLevel();
         }
     }

@@ -38,7 +38,7 @@ public class WorldGenerator : Singleton<WorldGenerator>
         unit.CurrentPosition = pos;
         unit.CurrentDirection = Vector2Int.right;
 
-        level.Units.Add(unit);
+        level.ActiveUnits.Add(unit);
     }
 
     public Player CreatePlayer()
