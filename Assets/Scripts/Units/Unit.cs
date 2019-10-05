@@ -64,6 +64,22 @@ public abstract class Unit : MonoBehaviour, ILevelObject
     {
         CurrentPosition = newPos;
         transform.position = new Vector3(newPos.x, 0, newPos.y);
+        if (CurrentDirection == Vector2Int.up)
+        {
+            transform.rotation = Quaternion.Euler(0, 0, 0);
+        }
+        else if (CurrentDirection == Vector2Int.down)
+        {
+            transform.rotation = Quaternion.Euler(0, 180, 0);
+        }
+        else if (CurrentDirection == Vector2Int.left)
+        {
+            transform.rotation = Quaternion.Euler(0, 270, 0);
+        }
+        else if (CurrentDirection == Vector2Int.right)
+        {
+            transform.rotation = Quaternion.Euler(0, 90, 0);
+        }
     }
 
     internal void Pickup()

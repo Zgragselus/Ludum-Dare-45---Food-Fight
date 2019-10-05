@@ -31,6 +31,7 @@ public class Player : Unit
         }
         if (direction != Vector2Int.zero)
         {
+            CurrentDirection = direction;
             SubmitMoveAction(direction);
             GameManager.Instance.StepCurrentLevel();
         }

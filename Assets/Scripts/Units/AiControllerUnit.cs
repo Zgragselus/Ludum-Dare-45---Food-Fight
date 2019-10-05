@@ -40,7 +40,7 @@ public class AiControllerUnit : Unit
 
     private bool HasPlayerInLineOfSight(out Vector2Int playerPosition)
     {
-        playerPosition = default;
+        playerPosition = GameManager.Instance.CurrentPlayer.CurrentPosition;
         return false;
     }
 
