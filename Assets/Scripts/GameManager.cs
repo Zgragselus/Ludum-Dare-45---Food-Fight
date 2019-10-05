@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,8 +9,12 @@ public class GameManager : Singleton<GameManager>
 
     private Camera _cam;
 
+    public Player CurrentPlayer;
+
     private void Start()
     {
+        // temporary spawning code
+        // should setup the whole game - e.g., 10 levels, including the first "tutorial" level and the "boss" level
         _cam = GameObject.Find("Main Camera").GetComponent<Camera>();
 
         CurrentLevel = new Level();
@@ -39,6 +44,7 @@ public class GameManager : Singleton<GameManager>
                 CurrentLevel.AddPlayer(player, neighbours[0]);
                 player.UpdatePosition();
                 _cam.GetComponent<FollowingCamera>().Target = player.transform;
+                CurrentPlayer = player;
             }
             else
             {
@@ -50,9 +56,20 @@ public class GameManager : Singleton<GameManager>
 
     public void StepCurrentLevel()
     {
+        // do all regular ticks
         foreach (var unit in CurrentLevel.Units)
         {
             unit.Tick();
         }
+
+        // kill units that died this turn - since we do not have speed factor in the game, all units get a chance to do a hit even if they might die during the round
+        foreach (var unit in CurrentLevel.Units)
+        {
+            unit.PostTick();
+        }
+
+        var results = new List<(Unit, Vector2Int, ActionType type)>();
+
+        CurrentLevel.DoActions(results);
     }
 }

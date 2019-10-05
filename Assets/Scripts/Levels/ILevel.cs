@@ -10,9 +10,7 @@ public interface ILevel
 
     int GetNeighbours(Vector2Int pos, in Span<Vector2Int> neighbours);
 
-    bool IsOccupiedByUnit(Vector2Int pos);
+    bool IsOccupiedByUnit(Vector2Int pos, out Unit unit);
 
     bool HasPickableItemAt(Vector2Int pos);
-
-    Unit GetUnitAtPosition(Vector2Int pos);
 }

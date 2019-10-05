@@ -44,9 +44,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c922e9e057e859b4db1fceba4f755ecc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Health: 0
+  Health: 25
   Armor: 0
-  Damage: 0
+  Damage: 5
   Experience: 0
   CurrentPosition: {x: 0, y: 0}
   CurrentDirection: {x: 0, y: 0}

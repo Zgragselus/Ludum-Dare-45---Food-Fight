@@ -20,22 +20,18 @@ public class Player : Unit
         Vector2Int direction = default;
         if (Input.GetButtonDown("Up"))
         {
-            Debug.Log("up");
             direction = Vector2Int.up;
         }
         else if (Input.GetButtonDown("Down"))
         {
-            Debug.Log("down");
             direction = Vector2Int.down;
         }
         else if (Input.GetButtonDown("Left"))
         {
-            Debug.Log("left");
             direction = Vector2Int.left;
         }
         else if (Input.GetButtonDown("Right"))
         {
-            Debug.Log("right");
             direction = Vector2Int.right;
         }
         if (direction != Vector2Int.zero && TryMove(direction))

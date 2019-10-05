@@ -10,6 +10,12 @@ public enum CellType : byte
     Corridor = (byte)'|'
 }
 
+public enum ActionType
+{
+    Move,
+    Attack,
+}
+
 public interface ILevelObject { }
 
 public class BSPNode
@@ -42,7 +48,8 @@ public class BSPNode
 public class Level : ILevel
 {
     public CellType[,] Map;
-    public ILevelObject[,] Objects;
+    public ILevelObject[,] ObjectsCurrent;
+    public ILevelObject[,] ObjectsNext;
     public int Size;
     private int _minRoomSize;
     private int _maxDepth;
@@ -81,6 +88,7 @@ public class Level : ILevel
             }
         }
     }
+
     private void BuildCorridorFloors()
     {
         for (int i = 0; i < Size; i++)
@@ -410,7 +418,8 @@ public class Level : ILevel
         _minRoomSize = 5;
 
         Map = new CellType[Size, Size];
-        Objects = new ILevelObject[Size, Size];
+        ObjectsNext = new ILevelObject[Size, Size];
+        ObjectsCurrent = new ILevelObject[Size, Size];
 
         _maxDepth = Log2Int(Size) - 4;
 
@@ -435,20 +444,37 @@ public class Level : ILevel
 
     #endregion
 
+    private Dictionary<Unit, (Vector2Int from, Vector2Int to)> _actionsToDo = new Dictionary<Unit, (Vector2Int from, Vector2Int to)>();
+
+    public void RegisterAction(Unit unit, Vector2Int from, Vector2Int to)
+    {
+        if (_actionsToDo.ContainsKey(unit))
+        {
+            throw new InvalidOperationException($"Unit {unit.name} already has a registered action for this frame.");
+        }
+        _actionsToDo.Add(unit, (from, to));
+    }
+
     public void AddPlayer(Player player, Vector2Int pos)
     {
-        if (!IsWalkable(pos) || IsOccupiedByUnit(pos))
+        if (!IsWalkable(pos) || IsOccupiedByUnit(pos, out _))
         {
             throw new InvalidOperationException("Cannot move player to the given position.");
         }
-        Objects[pos.x, pos.y] = player;
+        ObjectsCurrent[pos.x, pos.y] = player;
         player.CurrentPosition = pos;
         player.CurrentDirection = Vector2Int.right;
     }
 
     public bool Move(Vector2Int from, Vector2Int to)
     {
-        return IsWalkable(to);
+        if (IsWalkable(to))
+        {
+            ObjectsNext[to.x, to.y] = ObjectsCurrent[from.x, from.y];
+            ObjectsNext[from.x, from.y] = null;
+            return true;
+        }
+        return false;
     }
 
     private static Vector2Int[] s_neighbourOffsets = new Vector2Int[]
@@ -488,19 +514,19 @@ public class Level : ILevel
         return pos.x >= 0 && pos.y >= 0 && pos.x < Map.GetLength(0) && pos.y < Map.GetLength(1);
     }
 
-    public bool IsOccupiedByUnit(Vector2Int pos)
+    public bool IsOccupiedByUnit(Vector2Int pos, out Unit unit)
     {
-        return Objects[pos.x, pos.y] is Unit;
+        unit = null;
+        if (ObjectsCurrent[pos.x, pos.y] is Unit u)
+        {
+            unit = u;
+        }
+        return unit;
     }
 
     public bool HasPickableItemAt(Vector2Int pos)
     {
         return false;
-    }
-
-    public Unit GetUnitAtPosition(Vector2Int pos)
-    {
-        return null;
     }
 
     public bool TryGetAnyWalkablePosition(out Vector2Int pos)
@@ -518,5 +544,36 @@ public class Level : ILevel
             }
         }
         return false;
+    }
+
+    public void Kill(Unit unit)
+    {
+        ObjectsCurrent[unit.CurrentPosition.x, unit.CurrentPosition.y] = null;
+        Units.Remove(unit);
+        Debug.Log($"Killed {unit.gameObject.name}");
+        GameObject.Destroy(unit.gameObject, 5);
+    }
+
+    public void DoActions(List<(Unit, Vector2Int, ActionType type)> results)
+    {
+        // first do the player
+        if (_actionsToDo.TryGetValue(GameManager.Instance.CurrentPlayer, out var transition))
+        {
+            
+        }
+
+        // then the rest
+
+
+        var back = ObjectsCurrent;
+        ObjectsCurrent = ObjectsNext;
+        for (int i = 0; i < back.GetLength(0); i++)
+        {
+            for (int j = 0; j < back.GetLength(1); j++)
+            {
+                back[i, j] = default;
+            }
+        }
+        ObjectsNext = back;
     }
 }
