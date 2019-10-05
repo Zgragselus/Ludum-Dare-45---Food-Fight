@@ -364,7 +364,7 @@ public class Level : ILevel
 
     public bool Move(Vector2Int from, Vector2Int to)
     {
-        throw new NotImplementedException();
+        return IsWalkable(to);
     }
 
     private static Vector2Int[] s_neighbourOffsets = new Vector2Int[]
@@ -392,7 +392,7 @@ public class Level : ILevel
         return validNeighbours;
     }
 
-    private bool IsWalkable(Vector2Int pos)
+    public bool IsWalkable(Vector2Int pos)
     {
         return Map[pos.x, pos.y] == CellType.FLOOR || Map[pos.x, pos.y] == CellType.CORRIDOR;
     }
@@ -415,5 +415,22 @@ public class Level : ILevel
     public Unit GetUnitAtPosition(Vector2Int pos)
     {
         return null;
+    }
+
+    public bool TryGetAnyWalkablePosition(out Vector2Int pos)
+    {
+        pos = default;
+        for (int i = 0; i < Map.GetLength(0); i++)
+        {
+            for (int j = 0; j < Map.GetLength(1); j++)
+            {
+                pos = new Vector2Int(i, j);
+                if (IsWalkable(pos))
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

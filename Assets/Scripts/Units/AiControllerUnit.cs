@@ -6,7 +6,7 @@ using Random = UnityEngine.Random;
 
 public class AiControllerUnit : Unit
 {
-    private Vector2Int CurrentDirection;
+    public Vector2Int CurrentDirection;
 
     private void Update()
     {
@@ -35,7 +35,7 @@ public class AiControllerUnit : Unit
 
     private bool IsFacingObstacle()
     {
-        return false;
+        return !GameManager.Instance.CurrentLevel.IsWalkable(CurrentPosition + CurrentDirection) || !GameManager.Instance.CurrentLevel.IsWalkable(CurrentPosition + CurrentDirection * 2);
     }
 
     private bool HasPlayerInLineOfSight(out Vector2Int playerPosition)
