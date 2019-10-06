@@ -5,9 +5,16 @@ using UnityEngine;
 
 public class Player : Unit
 {
+    private float _lastTime;
+
+    private const float kAnimationsMaxLength = 1;
+
     private void Update()
     {
-        HandleMovementInput();
+        if (_lastTime + kAnimationsMaxLength < Time.time)
+        {
+            HandleMovementInput();
+        }
     }
 
     private void HandleMovementInput()
@@ -34,6 +41,7 @@ public class Player : Unit
             CurrentDirection = direction;
             SubmitMoveAction(direction);
             GameManager.Instance.StepCurrentLevel();
+            _lastTime = Time.time;
         }
     }
 }
