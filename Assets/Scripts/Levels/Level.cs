@@ -19,12 +19,15 @@ public enum ActionType
     PickUpItem,
     Wait,
     Die,
+    TransferLevel,
 }
 
 public interface ILevelObject { }
 
 public class Level : ILevel
 {
+    public int Index;
+
     public CellType[,] Map;
     public Unit[,] Units;
     public ILevelObject[,] Objects;
@@ -32,6 +35,71 @@ public class Level : ILevel
     public int Size;
 
     private Dictionary<Unit, (Vector2Int from, Vector2Int to)> _actionsToDo = new Dictionary<Unit, (Vector2Int from, Vector2Int to)>();
+
+    public Level(int index)
+    {
+        Index = index;
+    }
+
+    internal bool FindEntrancePosition(out Vector2Int pos)
+    {
+        pos = default;
+        for (int x = 0; x < Size; x++)
+        {
+            for (int y = 0; y < Size; y++)
+            {
+                if (SafeLook(x, y) == CellType.Entrance)
+                {
+                    for (int i = 0; i < s_neighbourOffsets.Length; i++)
+                    {
+                        pos = new Vector2Int(x, y) + s_neighbourOffsets[i];
+                        if (IsWalkable(pos))
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    internal void RemovePlayer()
+    {
+        for (int x = 0; x < Size; x++)
+        {
+            for (int y = 0; y < Size; y++)
+            {
+                if (Units[x, y] is Player)
+                {
+                    Units[x, y] = null;
+                }
+            }
+        }
+    }
+
+    internal bool FindExitPosition(out Vector2Int pos)
+    {
+        pos = default;
+        for (int x = 0; x < Size; x++)
+        {
+            for (int y = 0; y < Size; y++)
+            {
+                if (SafeLook(x, y) == CellType.Exit)
+                {
+                    for (int i = 0; i < s_neighbourOffsets.Length; i++)
+                    {
+                        pos = new Vector2Int(x, y) + s_neighbourOffsets[i];
+                        if (IsWalkable(pos))
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
 
     public CellType SafeLook(int i, int j)
     {
@@ -138,7 +206,7 @@ public class Level : ILevel
 
     public bool IsWalkable(Vector2Int pos)
     {
-        return Map[pos.x, pos.y] == CellType.Floor || Map[pos.x, pos.y] == CellType.Corridor;
+        return Map[pos.x, pos.y] == CellType.Floor || Map[pos.x, pos.y] == CellType.Corridor || Map[pos.x, pos.y] == CellType.Exit || Map[pos.x, pos.y] == CellType.Entrance;
     }
 
     private bool IsInRange(Vector2Int pos)
@@ -247,6 +315,17 @@ public class Level : ILevel
                 results.Add((GameManager.Instance.CurrentPlayer, playerTransition.to, ActionType.PickUpItem, obj));
 
                 Objects[playerTransition.to.x, playerTransition.to.y] = null;
+            }
+
+            // pick up item if there is any after moving
+            if (Map[playerTransition.to.x, playerTransition.to.y] == CellType.Entrance)
+            {
+                results.Add((GameManager.Instance.CurrentPlayer, playerTransition.to, ActionType.TransferLevel, Index - 1));
+            }
+
+            if (Map[playerTransition.to.x, playerTransition.to.y] == CellType.Exit)
+            {
+                results.Add((GameManager.Instance.CurrentPlayer, playerTransition.to, ActionType.TransferLevel, Index + 1));
             }
 
             _actionsToDo.Remove(GameManager.Instance.CurrentPlayer);
