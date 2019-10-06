@@ -3,6 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum UnitType
+{
+    Enemy01,
+    Enemy02,
+    Boss,
+}
+
 public class WorldGenerator : Singleton<WorldGenerator>
 {
     public Player PlayerPrefab;
@@ -13,6 +20,7 @@ public class WorldGenerator : Singleton<WorldGenerator>
     public MapTile ExitPrefab;
 
     public Unit Enemy01;
+    public Unit Boss;
 
     public PickupObject Powerup01;
 
@@ -30,9 +38,15 @@ public class WorldGenerator : Singleton<WorldGenerator>
         return tile;
     }
 
-    public void SpawnUnit(Level level, Vector2Int pos)
+    public void SpawnUnit(Level level, Vector2Int pos, UnitType type)
     {
-        var unit = Instantiate(Enemy01, level.WorldParent);
+        Unit prefab = GetPrefabForUnitType(type);
+        if (prefab == null)
+        {
+            return;
+        }
+
+        var unit = Instantiate(prefab, level.WorldParent);
         unit.transform.localPosition = new Vector3(pos.x, 0, pos.y);
         unit.transform.localRotation = Quaternion.identity;
         unit.CurrentPosition = pos;
@@ -64,6 +78,18 @@ public class WorldGenerator : Singleton<WorldGenerator>
                 return EntrancePrefab;
             case CellType.Exit:
                 return ExitPrefab;
+        }
+        return null;
+    }
+
+    public Unit GetPrefabForUnitType(UnitType type)
+    {
+        switch (type)
+        {
+            case UnitType.Enemy01:
+                return Enemy01;
+            case UnitType.Boss:
+                return Boss;
         }
         return null;
     }

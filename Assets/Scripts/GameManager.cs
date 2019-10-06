@@ -104,13 +104,19 @@ public class GameManager : Singleton<GameManager>
                 var locations = _levels[i].GenerateItemLocationList();
                 for (int j = 0; j < 10; j++)
                 {
-                    WorldGenerator.Instance.SpawnUnit(_levels[i], locations[j]);
+                    WorldGenerator.Instance.SpawnUnit(_levels[i], locations[j], UnitType.Enemy01);
                 }
 
                 for (int j = 10; j < 20; j++)
                 {
                     WorldGenerator.Instance.SpawnPickupItem(_levels[i], locations[j]);
                 }
+            }
+
+            // last "boss" level
+            if (!_levels[i].IsProcedural && i == _levels.Length - 1)
+            {
+                WorldGenerator.Instance.SpawnUnit(_levels[i], new Vector2Int(7, 7), UnitType.Boss);
             }
         }
 
