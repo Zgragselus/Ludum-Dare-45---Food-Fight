@@ -29,17 +29,28 @@ public class GameManager : Singleton<GameManager>
         // should setup the whole game - e.g., 10 levels, including the first "tutorial" level and the "boss" level
         _cam = GameObject.Find("Main Camera").GetComponent<Camera>();
 
-        _levels = new Level[LevelsToGenerate];
+        _levels = new Level[LevelsToGenerate + 2];
 
         var levelGenerator = new ProceduralLevelGenerator();
 
         _levelsParent = new GameObject("Levels");
 
+        // first generate data
+        _levels[0] = new Level();
+        PremadeLevelGenerator.GenerateFirstLevel(_levels[0]);
+
+        _levels[_levels.Length - 1] = new Level();
+        PremadeLevelGenerator.GenerateBossLevel(_levels[_levels.Length - 1]);
+
         for (int i = 0; i < LevelsToGenerate; i++)
         {
-            _levels[i] = new Level();
-            levelGenerator.Generate(_levels[i], LevelResolution, LevelMinRoomSize, LevelMaxDepthOffset);
+            _levels[i + 1] = new Level();
+            levelGenerator.Generate(_levels[i + 1], LevelResolution, LevelMinRoomSize, LevelMaxDepthOffset);
+        }
 
+        // now spawn stuff
+        for (int i = 0; i < _levels.Length; i++)
+        {
             var levelParent = new GameObject($"Level {i}");
             levelParent.transform.parent = _levelsParent.transform;
             _levels[i].WorldParent = levelParent.transform;
@@ -58,7 +69,7 @@ public class GameManager : Singleton<GameManager>
 
                     if (tile is ExitTile exit)
                     {
-                        exit.NextLevelIdx = i + 1 >= LevelsToGenerate ? -1 : i + 1;
+                        exit.NextLevelIdx = i + 1;
                     }
                 }
             }
