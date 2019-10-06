@@ -31,12 +31,14 @@ public class GameManager : Singleton<GameManager>
 
         _levels = new Level[LevelsToGenerate];
 
+        var levelGenerator = new ProceduralLevelGenerator();
+
         _levelsParent = new GameObject("Levels");
 
         for (int i = 0; i < LevelsToGenerate; i++)
         {
             _levels[i] = new Level();
-            _levels[i].Generate(LevelResolution, LevelMinRoomSize, LevelMaxDepthOffset);
+            levelGenerator.Generate(_levels[i], LevelResolution, LevelMinRoomSize, LevelMaxDepthOffset);
 
             var levelParent = new GameObject($"Level {i}");
             levelParent.transform.parent = _levelsParent.transform;
