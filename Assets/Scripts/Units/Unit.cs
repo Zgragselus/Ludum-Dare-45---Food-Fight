@@ -97,7 +97,7 @@ public abstract class Unit : MonoBehaviour
 
     internal void Pickup(PickupObject obj)
     {
-        GameObject.Destroy(obj.gameObject, 0.5f);
+        obj.Consume();
     }
 
     internal void Attack()

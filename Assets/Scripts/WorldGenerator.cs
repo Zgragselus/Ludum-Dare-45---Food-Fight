@@ -70,9 +70,12 @@ public class WorldGenerator : Singleton<WorldGenerator>
 
     internal void SpawnPickupItem(Level level, Vector2Int pos)
     {
-        var obj = Instantiate(Powerup01, level.WorldParent);
-        obj.transform.localPosition = new Vector3(pos.x, 0, pos.y);
-        obj.transform.localRotation = Quaternion.identity;
+        var goParent = new GameObject("dummyparent");
+        goParent.transform.parent = level.WorldParent;
+        goParent.transform.localPosition = new Vector3(pos.x, 0, pos.y);
+        goParent.transform.localRotation = Quaternion.identity;
+
+        var obj = Instantiate(Powerup01, goParent.transform);
 
         level.Objects[pos.x, pos.y] = obj;
     }
