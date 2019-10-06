@@ -62,6 +62,35 @@ public class Level : ILevel
 
     #region Generator
 
+    private List<Vector2Int> GenerateItemLocationList()
+    {
+        List<Vector2Int> result = new List<Vector2Int>();
+
+        for (int i = 0; i < Size; i++)
+        {
+            for (int j = 0; j < Size; j++)
+            {
+                if (SafeLook(i, j) == CellType.Floor)
+                {
+                    result.Add(new Vector2Int(i, j));
+                }
+            }
+        }
+
+        // Shuffle list
+        int n = result.Count;
+        while (n > 1)
+        {
+            n--;
+            int k = UnityEngine.Random.Range(0, n);
+            Vector2Int value = result[k];
+            result[k] = result[n];
+            result[n] = value;
+        }
+
+        return result;
+    }
+
     private CellType SafeLook(int i, int j)
     {
         if (i < 0)
