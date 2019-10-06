@@ -138,6 +138,7 @@ public class Level : ILevel
 
         Map[candidates[entrance].x, candidates[entrance].y] = CellType.Entrance;
     }
+
     private void GenerateExit()
     {
         List<Vector2Int> candidates = new List<Vector2Int>();
@@ -580,16 +581,6 @@ public class Level : ILevel
 
         RecursiveConnect(root);
 
-        for (int i = 0; i < Size; i++)
-        {
-            string s = "";
-            for (int j = 0; j < Size; j++)
-            {
-                s += (char)Map[i, j];
-            }
-            Debug.Log(s);
-        }
-
         BuildCorridorWalls();
 
         BuildCorridorFloors();
@@ -645,6 +636,8 @@ public class Level : ILevel
     };
 
     public List<Unit> ActiveUnits = new List<Unit>();
+
+    public Transform WorldParent;
 
     public int GetNeighbours(Vector2Int pos, in Span<Vector2Int> neighbours)
     {

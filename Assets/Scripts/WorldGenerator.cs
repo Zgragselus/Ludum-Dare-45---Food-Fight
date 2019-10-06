@@ -7,34 +7,32 @@ public class WorldGenerator : Singleton<WorldGenerator>
 {
     public Player PlayerPrefab;
 
-    public GameObject FloorPrefab;
-    public GameObject WallPrefab;
-    public GameObject EntrancePrefab;
-    public GameObject ExitPrefab;
+    public MapTile FloorPrefab;
+    public MapTile WallPrefab;
+    public MapTile EntrancePrefab;
+    public MapTile ExitPrefab;
 
     public Unit Enemy01;
 
-    private Transform _levelParent;
-
-    private void Start()
+    public MapTile SpawnStaticWorldBlock(Level level, Vector2Int pos, CellType type)
     {
-        var go = new GameObject("LevelObjects");
-        _levelParent = go.transform;
-    }
-
-    public void SpawnStaticWorldBlock(Level level, Vector2Int pos, CellType type)
-    {
-        GameObject prefab = GetPrefabForCellType(type);
+        MapTile prefab = GetPrefabForCellType(type);
         if (prefab == null)
         {
-            return;
+            return null;
         }
-        GameObject.Instantiate(prefab, new Vector3(pos.x, 0, pos.y), Quaternion.identity, _levelParent);
+        var tile = Instantiate(prefab, level.WorldParent);
+        tile.transform.localPosition = new Vector3(pos.x, 0, pos.y);
+        tile.transform.localRotation = Quaternion.identity;
+
+        return tile;
     }
 
     public void SpawnUnit(Level level, Vector2Int pos)
     {
-        var unit = Instantiate(Enemy01, new Vector3(pos.x, 0, pos.y), Quaternion.identity, _levelParent);
+        var unit = Instantiate(Enemy01, level.WorldParent);
+        unit.transform.localPosition = new Vector3(pos.x, 0, pos.y);
+        unit.transform.localRotation = Quaternion.identity;
         unit.CurrentPosition = pos;
         unit.CurrentDirection = Vector2Int.right;
 
@@ -43,14 +41,14 @@ public class WorldGenerator : Singleton<WorldGenerator>
 
     public Player CreatePlayer()
     {
-        var player = Instantiate(PlayerPrefab, Vector3.zero, Quaternion.identity, _levelParent);
+        var player = Instantiate(PlayerPrefab, Vector3.zero, Quaternion.identity);
         player.CurrentPosition = Vector2Int.zero;
         player.CurrentDirection = Vector2Int.right;
 
         return player;
     }
 
-    public GameObject GetPrefabForCellType(CellType type)
+    public MapTile GetPrefabForCellType(CellType type)
     {
         switch (type)
         {

@@ -6,13 +6,20 @@ using UnityEngine.UI;
 
 public class GameManager : Singleton<GameManager>
 {
-    public Level CurrentLevel;
+    public Level CurrentLevel => _levels[_currentLevelIdx];
+
+    public int LevelsToGenerate = 5;
 
     private Camera _cam;
 
     public int LevelResolution = 64;
     public int LevelMinRoomSize = 5;
     public int LevelMaxDepthOffset = 3;
+
+    private Level[] _levels;
+    private int _currentLevelIdx = 0;
+
+    private GameObject _levelsParent;
 
     public Player CurrentPlayer;
 
@@ -22,17 +29,40 @@ public class GameManager : Singleton<GameManager>
         // should setup the whole game - e.g., 10 levels, including the first "tutorial" level and the "boss" level
         _cam = GameObject.Find("Main Camera").GetComponent<Camera>();
 
-        CurrentLevel = new Level();
+        _levels = new Level[LevelsToGenerate];
 
-        CurrentLevel.Generate(LevelResolution, LevelMinRoomSize, LevelMaxDepthOffset);
+        _levelsParent = new GameObject("Levels");
 
-        for (int i = 0; i < CurrentLevel.Size; i++)
+        for (int i = 0; i < LevelsToGenerate; i++)
         {
-            for (int j = 0; j < CurrentLevel.Size; j++)
+            _levels[i] = new Level();
+            _levels[i].Generate(LevelResolution, LevelMinRoomSize, LevelMaxDepthOffset);
+
+            var levelParent = new GameObject($"Level {i}");
+            levelParent.transform.parent = _levelsParent.transform;
+            _levels[i].WorldParent = levelParent.transform;
+
+            _levels[i].WorldParent.localPosition = new Vector3(i * LevelResolution * 2, 0, 0);
+
+            for (int x = 0; x < _levels[i].Size; x++)
             {
-                WorldGenerator.Instance.SpawnStaticWorldBlock(CurrentLevel, new Vector2Int(i, j), CurrentLevel.Map[i, j]);
+                for (int y = 0; y < _levels[i].Size; y++)
+                {
+                    var tile = WorldGenerator.Instance.SpawnStaticWorldBlock(_levels[i], new Vector2Int(x, y), _levels[i].Map[x, y]);
+                    if (tile is EntranceTile enter)
+                    {
+                        enter.PreviousLevelIdx = i - 1;
+                    }
+
+                    if (tile is ExitTile exit)
+                    {
+                        exit.NextLevelIdx = i + 1 >= LevelsToGenerate ? -1 : i + 1;
+                    }
+                }
             }
         }
+
+        _currentLevelIdx = 0;
 
         if (CurrentLevel.TryGetAnyWalkablePosition(out Vector2Int posToSpawnAiUnit))
         {
