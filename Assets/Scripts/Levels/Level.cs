@@ -314,6 +314,14 @@ public class Level : ILevel
                 results.Add((GameManager.Instance.CurrentPlayer, playerTransition.to, ActionType.Move, null));
 
                 tempUnits[playerTransition.to.x, playerTransition.to.y] = GameManager.Instance.CurrentPlayer;
+
+                // pick up item if there is any after moving
+                if (Objects[playerTransition.to.x, playerTransition.to.y] is PickupObject obj)
+                {
+                    results.Add((GameManager.Instance.CurrentPlayer, playerTransition.to, ActionType.PickUpItem, obj));
+
+                    Objects[playerTransition.to.x, playerTransition.to.y] = null;
+                }
             }
             // the space is occupied by some other unit; get unit and it's transition
             else if (_actionsToDo.TryGetValue(otherUnit, out var otherTransition))
@@ -345,20 +353,20 @@ public class Level : ILevel
 
                     tempUnits[playerTransition.to.x, playerTransition.to.y] = GameManager.Instance.CurrentPlayer;
                     tempUnits[otherTransition.to.x, otherTransition.to.y] = otherUnit;
+
+                    // pick up item if there is any after moving
+                    if (Objects[playerTransition.to.x, playerTransition.to.y] is PickupObject obj)
+                    {
+                        results.Add((GameManager.Instance.CurrentPlayer, playerTransition.to, ActionType.PickUpItem, obj));
+
+                        Objects[playerTransition.to.x, playerTransition.to.y] = null;
+                    }
                 }
 
                 _actionsToDo.Remove(otherUnit);
             }
 
-            // pick up item if there is any after moving
-            if (Objects[playerTransition.to.x, playerTransition.to.y] is PickupObject obj)
-            {
-                results.Add((GameManager.Instance.CurrentPlayer, playerTransition.to, ActionType.PickUpItem, obj));
 
-                Objects[playerTransition.to.x, playerTransition.to.y] = null;
-            }
-
-            // pick up item if there is any after moving
             if (Map[playerTransition.to.x, playerTransition.to.y] == CellType.Entrance)
             {
                 results.Add((GameManager.Instance.CurrentPlayer, playerTransition.to, ActionType.TransferLevel, Index - 1));
