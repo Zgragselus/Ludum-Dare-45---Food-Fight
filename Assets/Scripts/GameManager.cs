@@ -98,16 +98,26 @@ public class GameManager : Singleton<GameManager>
                     }
                 }
             }
+
+            if (_levels[i].IsProcedural)
+            {
+                var locations = _levels[i].GenerateItemLocationList();
+                for (int j = 0; j < 10; j++)
+                {
+                    WorldGenerator.Instance.SpawnUnit(_levels[i], locations[j]);
+                }
+
+                for (int j = 10; j < 20; j++)
+                {
+                    WorldGenerator.Instance.SpawnPickupItem(_levels[i], locations[j]);
+                }
+            }
         }
 
         _currentLevelIdx = 0;
 
         if (CurrentLevel.TryGetAnyWalkablePosition(out Vector2Int posToSpawnAiUnit))
         {
-            Debug.Log($"spawning at {posToSpawnAiUnit}");
-
-            WorldGenerator.Instance.SpawnUnit(CurrentLevel, posToSpawnAiUnit);
-
             Span<Vector2Int> neighbours = stackalloc Vector2Int[4];
             int count = CurrentLevel.GetNeighbours(posToSpawnAiUnit, in neighbours);
 
@@ -157,7 +167,7 @@ public class GameManager : Singleton<GameManager>
 
         foreach (var pickups in results.Where(x => x.type == ActionType.PickUpItem))
         {
-            pickups.unit.Pickup();
+            pickups.unit.Pickup(pickups.payload as PickupObject);
         }
 
         foreach (var attacks in results.Where(x => x.type == ActionType.Attack))

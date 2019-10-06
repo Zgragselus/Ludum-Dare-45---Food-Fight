@@ -48,15 +48,11 @@ public class AiControllerUnit : Unit
         {
             if (playerPosition == checkedPosition)
             {
-                Debug.Log("has line of sight");
-
                 return true;
             }
 
             if (!GameManager.Instance.CurrentLevel.IsWalkableForAi(checkedPosition))
             {
-                Debug.Log("does not have line of sight");
-
                 return false;
             }
 

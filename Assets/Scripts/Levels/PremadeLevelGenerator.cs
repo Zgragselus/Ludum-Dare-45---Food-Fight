@@ -17,7 +17,7 @@ public class PremadeLevelGenerator
 
         level.Size = 12;
         level.Map = new CellType[level.Size, level.Size];
-        level.Objects = new ILevelObject[level.Size, level.Size];
+        level.Objects = new PickupObject[level.Size, level.Size];
         level.Units = new Unit[level.Size, level.Size];
 
         int i = 0;
@@ -30,7 +30,7 @@ public class PremadeLevelGenerator
                 {
                     foreach (var x in line)
                     {
-                        if (i == 144)
+                        if (i == level.Size * level.Size)
                         {
                             break;
                         }
@@ -57,7 +57,7 @@ public class PremadeLevelGenerator
 
         level.Size = 12;
         level.Map = new CellType[level.Size, level.Size];
-        level.Objects = new ILevelObject[level.Size, level.Size];
+        level.Objects = new PickupObject[level.Size, level.Size];
         level.Units = new Unit[level.Size, level.Size];
 
         int i = 0;

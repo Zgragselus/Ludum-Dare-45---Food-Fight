@@ -22,15 +22,13 @@ public enum ActionType
     TransferLevel,
 }
 
-public interface ILevelObject { }
-
 public class Level : ILevel
 {
     public int Index;
 
     public CellType[,] Map;
     public Unit[,] Units;
-    public ILevelObject[,] Objects;
+    public PickupObject[,] Objects;
 
     public int Size;
 
@@ -126,7 +124,7 @@ public class Level : ILevel
         return Map[i, j];
     }
 
-    private List<Vector2Int> GenerateItemLocationList()
+    public List<Vector2Int> GenerateItemLocationList()
     {
         List<Vector2Int> result = new List<Vector2Int>();
 
@@ -134,7 +132,7 @@ public class Level : ILevel
         {
             for (int j = 0; j < Size; j++)
             {
-                if (SafeLook(i, j) == CellType.Floor)
+                if (SafeLook(i, j) == CellType.Floor || SafeLook(i, j) == CellType.Corridor)
                 {
                     result.Add(new Vector2Int(i, j));
                 }
@@ -206,6 +204,8 @@ public class Level : ILevel
 
     public Transform WorldParent;
 
+    public bool IsProcedural = false;
+
     public int GetNeighbours(Vector2Int pos, in Span<Vector2Int> neighbours)
     {
         int validNeighbours = 0;
@@ -242,12 +242,12 @@ public class Level : ILevel
 
     public bool IsWalkable(Vector2Int pos)
     {
-        return Map[pos.x, pos.y] == CellType.Floor || Map[pos.x, pos.y] == CellType.Corridor || Map[pos.x, pos.y] == CellType.Exit || Map[pos.x, pos.y] == CellType.Entrance;
+        return SafeLook(pos.x, pos.y) == CellType.Floor || SafeLook(pos.x, pos.y) == CellType.Corridor || SafeLook(pos.x, pos.y) == CellType.Exit || SafeLook(pos.x, pos.y) == CellType.Entrance;
     }
 
     public bool IsWalkableForAi(Vector2Int pos)
     {
-        return Map[pos.x, pos.y] == CellType.Floor || Map[pos.x, pos.y] == CellType.Corridor;
+        return SafeLook(pos.x, pos.y) == CellType.Floor || SafeLook(pos.x, pos.y) == CellType.Corridor;
     }
 
     private bool IsInRange(Vector2Int pos)
@@ -351,7 +351,7 @@ public class Level : ILevel
             }
 
             // pick up item if there is any after moving
-            if (Objects[playerTransition.to.x, playerTransition.to.y] is ILevelObject obj)
+            if (Objects[playerTransition.to.x, playerTransition.to.y] is PickupObject obj)
             {
                 results.Add((GameManager.Instance.CurrentPlayer, playerTransition.to, ActionType.PickUpItem, obj));
 

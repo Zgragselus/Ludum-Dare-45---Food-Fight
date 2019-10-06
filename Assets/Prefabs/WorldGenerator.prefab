@@ -54,3 +54,5 @@ MonoBehaviour:
   ExitPrefab: {fileID: 4982105884748908114, guid: 755e0b471d36e6f4588d698638e6028d,
     type: 3}
   Enemy01: {fileID: 2037282259346413277, guid: 754ec979c1f7a0f4cba26a3278c24dca, type: 3}
+  Powerup01: {fileID: 5185197460216195871, guid: 2dce08dbb202b894f8676a62cd27a774,
+    type: 3}

@@ -36,6 +36,8 @@ public class ProceduralLevelGenerator
 
     internal void Generate(Level level, int resolution, int minimumRoomSize, int maximumDepthOffset)
     {
+        level.IsProcedural = true;
+
         // Alloc
         level.Size = resolution;
 
@@ -43,7 +45,7 @@ public class ProceduralLevelGenerator
 
         level.Map = new CellType[level.Size, level.Size];
         level.Units = new Unit[level.Size, level.Size];
-        level.Objects = new ILevelObject[level.Size, level.Size];
+        level.Objects = new PickupObject[level.Size, level.Size];
 
         _maxDepth = Log2Int(level.Size) - maximumDepthOffset;
 

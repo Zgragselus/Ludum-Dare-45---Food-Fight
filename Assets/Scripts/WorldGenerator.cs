@@ -14,6 +14,8 @@ public class WorldGenerator : Singleton<WorldGenerator>
 
     public Unit Enemy01;
 
+    public PickupObject Powerup01;
+
     public MapTile SpawnStaticWorldBlock(Level level, Vector2Int pos, CellType type)
     {
         MapTile prefab = GetPrefabForCellType(type);
@@ -37,6 +39,7 @@ public class WorldGenerator : Singleton<WorldGenerator>
         unit.CurrentDirection = Vector2Int.right;
 
         level.ActiveUnits.Add(unit);
+        level.Units[pos.x, pos.y] = unit;
     }
 
     public Player CreatePlayer()
@@ -63,5 +66,14 @@ public class WorldGenerator : Singleton<WorldGenerator>
                 return ExitPrefab;
         }
         return null;
+    }
+
+    internal void SpawnPickupItem(Level level, Vector2Int pos)
+    {
+        var obj = Instantiate(Powerup01, level.WorldParent);
+        obj.transform.localPosition = new Vector3(pos.x, 0, pos.y);
+        obj.transform.localRotation = Quaternion.identity;
+
+        level.Objects[pos.x, pos.y] = obj;
     }
 }

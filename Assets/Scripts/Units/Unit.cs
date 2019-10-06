@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class Unit : MonoBehaviour, ILevelObject
+public abstract class Unit : MonoBehaviour
 {
     public int Health;
 
@@ -95,8 +95,9 @@ public abstract class Unit : MonoBehaviour, ILevelObject
         UpdateVisuals();
     }
 
-    internal void Pickup()
+    internal void Pickup(PickupObject obj)
     {
+        GameObject.Destroy(obj.gameObject, 0.5f);
     }
 
     internal void Attack()
