@@ -28,14 +28,14 @@ public class AiControllerUnit : Unit
     private void TurnToAvailableDirection()
     {
         Span<Vector2Int> neighbours = stackalloc Vector2Int[4];
-        int count = GameManager.Instance.CurrentLevel.GetNeighbours(CurrentPosition, in neighbours);
+        int count = GameManager.Instance.CurrentLevel.GetNeighboursAi(CurrentPosition, in neighbours);
         // turn to random non-blocked direction
         CurrentDirection = neighbours[Random.Range(0, count)] - CurrentPosition;
     }
 
     private bool IsFacingObstacle()
     {
-        return !GameManager.Instance.CurrentLevel.IsWalkable(CurrentPosition + CurrentDirection) || !GameManager.Instance.CurrentLevel.IsWalkable(CurrentPosition + CurrentDirection * 2);
+        return !GameManager.Instance.CurrentLevel.IsWalkableForAi(CurrentPosition + CurrentDirection) || !GameManager.Instance.CurrentLevel.IsWalkableForAi(CurrentPosition + CurrentDirection * 2);
     }
 
     private bool HasPlayerInLineOfSight(out Vector2Int playerPosition)
@@ -53,7 +53,7 @@ public class AiControllerUnit : Unit
                 return true;
             }
 
-            if (!GameManager.Instance.CurrentLevel.IsWalkable(checkedPosition))
+            if (!GameManager.Instance.CurrentLevel.IsWalkableForAi(checkedPosition))
             {
                 Debug.Log("does not have line of sight");
 

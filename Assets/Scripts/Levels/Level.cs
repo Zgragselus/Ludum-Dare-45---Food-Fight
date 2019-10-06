@@ -166,10 +166,29 @@ public class Level : ILevel
 
     public void AddPlayer(Player player, Vector2Int pos)
     {
-        if (!IsWalkable(pos) || IsOccupiedByUnit(pos, out _))
+        if (!IsWalkable(pos))
         {
-            throw new InvalidOperationException("Cannot move player to the given position.");
+            throw new InvalidOperationException($"Cannot move player to the given position (is not walkable).");
         }
+
+        if (IsOccupiedByUnit(pos, out Unit u))
+        {
+            Span<Vector2Int> neighbours = stackalloc Vector2Int[4];
+            int count = GetNeighboursAi(u.CurrentPosition, in neighbours);
+            Units[pos.x, pos.y] = null;
+            if (count > 0)
+            {
+                u.CurrentPosition = neighbours[0];
+                Units[u.CurrentPosition.x, u.CurrentPosition.y] = u;
+                u.UpdateVisuals();
+            }
+            else
+            {
+                // telefrag
+                Kill(u);
+            }
+        }
+
         Units[pos.x, pos.y] = player;
         player.CurrentPosition = pos;
         player.CurrentDirection = Vector2Int.right;
@@ -204,9 +223,31 @@ public class Level : ILevel
         return validNeighbours;
     }
 
+    public int GetNeighboursAi(Vector2Int pos, in Span<Vector2Int> neighbours)
+    {
+        int validNeighbours = 0;
+        for (var i = 0; i < s_neighbourOffsets.Length; i++)
+        {
+            var offset = s_neighbourOffsets[i];
+            if (!IsInRange(pos + offset) || !IsWalkableForAi(pos + offset))
+            {
+                continue;
+            }
+
+            neighbours[validNeighbours] = pos + offset;
+            validNeighbours++;
+        }
+        return validNeighbours;
+    }
+
     public bool IsWalkable(Vector2Int pos)
     {
         return Map[pos.x, pos.y] == CellType.Floor || Map[pos.x, pos.y] == CellType.Corridor || Map[pos.x, pos.y] == CellType.Exit || Map[pos.x, pos.y] == CellType.Entrance;
+    }
+
+    public bool IsWalkableForAi(Vector2Int pos)
+    {
+        return Map[pos.x, pos.y] == CellType.Floor || Map[pos.x, pos.y] == CellType.Corridor;
     }
 
     private bool IsInRange(Vector2Int pos)
@@ -232,7 +273,7 @@ public class Level : ILevel
             for (int j = 0; j < Map.GetLength(1); j++)
             {
                 pos = new Vector2Int(i, j);
-                if (IsWalkable(pos))
+                if (IsWalkableForAi(pos))
                 {
                     return true;
                 }
