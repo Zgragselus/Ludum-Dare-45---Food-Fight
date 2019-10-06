@@ -63,7 +63,7 @@ public abstract class Unit : MonoBehaviour, ILevelObject
     internal void Move(Vector2Int newPos)
     {
         CurrentPosition = newPos;
-        transform.position = new Vector3(newPos.x, 0, newPos.y);
+        transform.position = GameManager.Instance.CurrentLevel.WorldParent.position + new Vector3(newPos.x, 0, newPos.y);
         if (CurrentDirection == Vector2Int.up)
         {
             transform.rotation = Quaternion.Euler(0, 0, 0);
@@ -80,6 +80,11 @@ public abstract class Unit : MonoBehaviour, ILevelObject
         {
             transform.rotation = Quaternion.Euler(0, 90, 0);
         }
+    }
+
+    internal void TransferLevel(int levelIdx)
+    {
+        GameManager.Instance.MovePlayerToLevel(levelIdx, GameManager.Instance.CurrentLevel.Index < levelIdx);
     }
 
     internal void Pickup()

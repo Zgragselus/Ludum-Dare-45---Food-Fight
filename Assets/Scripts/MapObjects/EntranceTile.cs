@@ -4,5 +4,5 @@ using UnityEngine;
 
 public class EntranceTile : MapTile
 {
-    public int PreviousLevelIdx;
+    public Level PreviousLevel;
 }

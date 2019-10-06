@@ -4,5 +4,5 @@ using UnityEngine;
 
 public class ExitTile : MapTile
 {
-    public int NextLevelIdx;
+    public Level NextLevel;
 }

@@ -23,23 +23,59 @@ public class GameManager : Singleton<GameManager>
 
     public Player CurrentPlayer;
 
+    public void MovePlayerToLevel(int levelIdx, bool downstairs)
+    {
+        if (downstairs)
+        {
+            if (_levels[levelIdx].FindEntrancePosition(out Vector2Int pos))
+            {
+                ChangeLevel(_levels[levelIdx], pos);
+            }
+        }
+        else
+        {
+            if (_levels[levelIdx].FindExitPosition(out Vector2Int pos))
+            {
+                ChangeLevel(_levels[levelIdx], pos);
+            }
+        }
+    }
+
+    private void ChangeLevel(Level level, Vector2Int pos)
+    {
+        CurrentLevel.RemovePlayer();
+        _currentLevelIdx = level.Index;
+        CurrentLevel.AddPlayer(CurrentPlayer, pos);
+    }
+
     private void Start()
     {
         // temporary spawning code
         // should setup the whole game - e.g., 10 levels, including the first "tutorial" level and the "boss" level
         _cam = GameObject.Find("Main Camera").GetComponent<Camera>();
 
-        _levels = new Level[LevelsToGenerate];
+        _levels = new Level[LevelsToGenerate + 2];
 
         var levelGenerator = new ProceduralLevelGenerator();
 
         _levelsParent = new GameObject("Levels");
 
+        // first generate data
+        _levels[0] = new Level(0);
+        PremadeLevelGenerator.GenerateFirstLevel(_levels[0]);
+
+        _levels[_levels.Length - 1] = new Level(_levels.Length - 1);
+        PremadeLevelGenerator.GenerateBossLevel(_levels[_levels.Length - 1]);
+
         for (int i = 0; i < LevelsToGenerate; i++)
         {
-            _levels[i] = new Level();
-            levelGenerator.Generate(_levels[i], LevelResolution, LevelMinRoomSize, LevelMaxDepthOffset);
+            _levels[i + 1] = new Level(i + 1);
+            levelGenerator.Generate(_levels[i + 1], LevelResolution, LevelMinRoomSize, LevelMaxDepthOffset);
+        }
 
+        // now spawn stuff
+        for (int i = 0; i < _levels.Length; i++)
+        {
             var levelParent = new GameObject($"Level {i}");
             levelParent.transform.parent = _levelsParent.transform;
             _levels[i].WorldParent = levelParent.transform;
@@ -53,12 +89,12 @@ public class GameManager : Singleton<GameManager>
                     var tile = WorldGenerator.Instance.SpawnStaticWorldBlock(_levels[i], new Vector2Int(x, y), _levels[i].Map[x, y]);
                     if (tile is EntranceTile enter)
                     {
-                        enter.PreviousLevelIdx = i - 1;
+                        enter.PreviousLevel = _levels[i - 1];
                     }
 
                     if (tile is ExitTile exit)
                     {
-                        exit.NextLevelIdx = i + 1 >= LevelsToGenerate ? -1 : i + 1;
+                        exit.NextLevel = _levels[i + 1];
                     }
                 }
             }
@@ -112,6 +148,11 @@ public class GameManager : Singleton<GameManager>
         foreach (var moves in results.Where(x => x.type == ActionType.Move))
         {
             moves.unit.Move(moves.position);
+        }
+
+        foreach (var transfers in results.Where(x => x.type == ActionType.TransferLevel))
+        {
+            transfers.unit.TransferLevel((int)transfers.payload);
         }
 
         foreach (var pickups in results.Where(x => x.type == ActionType.PickUpItem))
