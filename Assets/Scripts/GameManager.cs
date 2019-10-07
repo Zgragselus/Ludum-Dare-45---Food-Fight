@@ -221,7 +221,7 @@ public class GameManager : Singleton<GameManager>
 
         foreach (var attacks in results.Where(x => x.type == ActionType.Attack))
         {
-            attacks.unit.Attack();
+            attacks.unit.Attack(attacks.payload as Unit);
         }
 
         foreach (var deaths in results.Where(x => x.type == ActionType.Die))

@@ -41,7 +41,7 @@ public abstract class Unit : MonoBehaviour
 
         transform.localScale = Vector3.one * 0.5f;
     }
-    
+
     protected void SubmitMoveAction(Vector2Int direction)
     {
         var newPosition = CurrentPosition + direction;
@@ -148,8 +148,11 @@ public abstract class Unit : MonoBehaviour
         obj.Consume(this);
     }
 
-    internal void Attack()
+    internal void Attack(Unit u)
     {
+        CurrentDirection = u.CurrentPosition - CurrentPosition;
+        UpdateVisuals();
+
         if (LeftHand != null)
         {
             LeftHand.GetComponent<HandController>().Hit();
