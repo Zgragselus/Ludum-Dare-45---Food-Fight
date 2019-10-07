@@ -23,6 +23,15 @@ public class GameManager : Singleton<GameManager>
 
     public Player CurrentPlayer;
 
+    public Text DamageText;
+    public Text HpText;
+
+    public GameObject StartCanvas;
+    public GameObject GameCanvas;
+
+    public GameObject LoseCanvas;
+    public GameObject WinCanvas;
+
     public void MovePlayerToLevel(int levelIdx, bool downstairs)
     {
         if (downstairs)
@@ -140,7 +149,32 @@ public class GameManager : Singleton<GameManager>
                 throw new InvalidOperationException("nowhere to spawn the player");
             }
         }
+    }
 
+    public void Win()
+    {
+    }
+
+    internal void Lose()
+    {
+    }
+
+    public bool IsStarted = false;
+
+    private void Update()
+    {
+        if (!IsStarted)
+        {
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                IsStarted = true;
+                StartCanvas.SetActive(false);
+                GameCanvas.SetActive(true);
+            }
+        }
+
+        DamageText.text = CurrentPlayer.Damage.ToString();
+        HpText.text = CurrentPlayer.Health.ToString();
     }
 
     public void StepCurrentLevel()

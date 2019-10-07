@@ -31,7 +31,10 @@ public abstract class Unit : MonoBehaviour
     protected float kAnimationsMaxLength = 0.25f;
     protected float kAnimationsInvMaxLength;
 
+    public bool IsBoss;
+
     public bool IsDead => Health == 0;
+
     void Start()
     {
         kAnimationsInvMaxLength = 1.0f / kAnimationsMaxLength;
@@ -87,7 +90,7 @@ public abstract class Unit : MonoBehaviour
         UpdateVisuals();
     }
 
-    public void Update()
+    private void Update()
     {
         if (_animationActive == true)
         {
@@ -160,5 +163,9 @@ public abstract class Unit : MonoBehaviour
 
     internal void Die()
     {
+        if (IsBoss)
+        {
+            GameManager.Instance.Win();
+        }
     }
 }

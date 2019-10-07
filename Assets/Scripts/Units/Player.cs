@@ -9,11 +9,19 @@ public class Player : Unit
 
     private void Update()
     {
-        base.Update();
+        if (!GameManager.Instance.IsStarted)
+        {
+            return;
+        }
 
         if (_lastTime + kAnimationsMaxLength < Time.time)
         {
             HandleMovementInput();
+        }
+
+        if (IsDead)
+        {
+            GameManager.Instance.Lose();
         }
     }
 
