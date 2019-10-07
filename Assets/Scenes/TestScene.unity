@@ -837,7 +837,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: ???????????????
+  m_Text: FOOD FIGHT
 --- !u!222 &789396037
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1294,10 +1294,10 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967295
   volumeAnchorOverride: {fileID: 0}
-  antialiasing: 2
+  antialiasing: 0
   SMAAQuality: 2
-  dithering: 1
-  stopNaNs: 0
+  dithering: 0
+  stopNaNs: 1
   physicalParameters:
     m_Iso: 200
     m_ShutterSpeed: 0.005

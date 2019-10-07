@@ -9,6 +9,8 @@ public class Player : Unit
 
     private void Update()
     {
+        base.Update();
+
         if (!GameManager.Instance.IsStarted)
         {
             return;

@@ -90,7 +90,7 @@ public abstract class Unit : MonoBehaviour
         UpdateVisuals();
     }
 
-    private void Update()
+    protected void Update()
     {
         if (_animationActive == true)
         {
