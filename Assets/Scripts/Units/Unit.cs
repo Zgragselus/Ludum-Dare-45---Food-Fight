@@ -20,6 +20,9 @@ public abstract class Unit : MonoBehaviour
 
     public Vector2Int CurrentDirection;
 
+    public GameObject LeftHand = null;
+    public GameObject RightHand = null;
+
     private bool _animationActive = false;
     private float _lerpPosition;
     private Vector3 _prevPosition;
@@ -142,6 +145,15 @@ public abstract class Unit : MonoBehaviour
 
     internal void Attack()
     {
+        if (LeftHand != null)
+        {
+            LeftHand.GetComponent<HandController>().Hit();
+        }
+
+        if (RightHand != null)
+        {
+            RightHand.GetComponent<HandController>().Hit();
+        }
     }
 
     internal void Die()
