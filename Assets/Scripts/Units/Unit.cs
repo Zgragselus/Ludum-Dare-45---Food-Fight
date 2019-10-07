@@ -13,12 +13,27 @@ public abstract class Unit : MonoBehaviour
 
     public int Experience;
 
+    public float AnimationJumpHeight = 0.5f;
+    public float AnimationScaleFactor = 0.3f;
+
     public Vector2Int CurrentPosition;
 
     public Vector2Int CurrentDirection;
 
-    public bool IsDead => Health == 0;
+    private bool _animationActive = false;
+    private float _lerpPosition;
+    private Vector3 _prevPosition;
+    private Vector3 _nextPosition;
 
+    protected float kAnimationsMaxLength = 0.25f;
+    protected float kAnimationsInvMaxLength;
+
+    public bool IsDead => Health == 0;
+    void Start()
+    {
+        kAnimationsInvMaxLength = 1.0f / kAnimationsMaxLength;
+    }
+    
     protected void SubmitMoveAction(Vector2Int direction)
     {
         var newPosition = CurrentPosition + direction;
@@ -67,9 +82,34 @@ public abstract class Unit : MonoBehaviour
         UpdateVisuals();
     }
 
+    public void Update()
+    {
+        if (_animationActive == true)
+        {
+            Vector3 tmp = Vector3.Lerp(_prevPosition, _nextPosition, Easing.EaseInOutCubic(_lerpPosition));
+            tmp.y = Mathf.Sin(_lerpPosition * Mathf.PI) * AnimationJumpHeight;
+
+            transform.position = tmp;
+            transform.localScale = Vector3.one * (1.0f + Mathf.Sin(Easing.EaseInOut(_lerpPosition) * Mathf.PI) * AnimationScaleFactor);
+
+            _lerpPosition += Time.deltaTime * kAnimationsInvMaxLength;
+            if (_lerpPosition > 1.0f)
+            {
+                _lerpPosition = 1.0f;
+            }
+        }
+    }
+
     public void UpdateVisuals()
     {
-        transform.position = GameManager.Instance.CurrentLevel.WorldParent.position + new Vector3(CurrentPosition.x, 0, CurrentPosition.y);
+        _animationActive = true;
+
+        _prevPosition = transform.position;
+        _nextPosition = GameManager.Instance.CurrentLevel.WorldParent.position + new Vector3(CurrentPosition.x, 0, CurrentPosition.y);
+        _lerpPosition = 0.0f;
+        //transform.position = GameManager.Instance.CurrentLevel.WorldParent.position + new Vector3(CurrentPosition.x, 0, CurrentPosition.y);
+
+
         if (CurrentDirection == Vector2Int.up)
         {
             transform.rotation = Quaternion.Euler(0, 0, 0);

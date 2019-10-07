@@ -7,10 +7,10 @@ public class Player : Unit
 {
     private float _lastTime;
 
-    private const float kAnimationsMaxLength = 1;
-
     private void Update()
     {
+        base.Update();
+
         if (_lastTime + kAnimationsMaxLength < Time.time)
         {
             HandleMovementInput();
