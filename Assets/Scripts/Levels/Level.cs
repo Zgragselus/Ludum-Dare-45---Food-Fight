@@ -124,6 +124,35 @@ public class Level : ILevel
         return Map[i, j];
     }
 
+    public CellType SafeLookEdges(int i, int j)
+    {
+        if (i < 0)
+        {
+            i = 0;
+            return CellType.Empty;
+        }
+
+        if (j < 0)
+        {
+            j = 0;
+            return CellType.Empty;
+        }
+
+        if (i >= Size)
+        {
+            i = Size - 1;
+            return CellType.Empty;
+        }
+
+        if (j >= Size)
+        {
+            j = Size - 1;
+            return CellType.Empty;
+        }
+
+        return Map[i, j];
+    }
+
     public List<Vector2Int> GenerateItemLocationList()
     {
         List<Vector2Int> result = new List<Vector2Int>();

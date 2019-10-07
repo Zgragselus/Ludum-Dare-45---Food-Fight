@@ -20,6 +20,12 @@ public class WorldGenerator : Singleton<WorldGenerator>
     public MapTile EntrancePrefab;
     public MapTile ExitPrefab;
 
+    public MapTile WallPrefabEnd;
+    public MapTile WallPrefabStraight;
+    public MapTile WallPrefabCorner;
+    public MapTile WallPrefabT;
+    public MapTile WallPrefabCross;
+
     public Unit Enemy01;
     public Unit Boss;
 
@@ -27,14 +33,15 @@ public class WorldGenerator : Singleton<WorldGenerator>
 
     public MapTile SpawnStaticWorldBlock(Level level, Vector2Int pos, CellType type)
     {
-        MapTile prefab = GetPrefabForCellType(type);
+        Quaternion rotation = Quaternion.identity;
+        MapTile prefab = GetPrefabForCellType(level, type, pos, ref rotation);
         if (prefab == null)
         {
             return null;
         }
         var tile = Instantiate(prefab, level.WorldParent);
         tile.transform.localPosition = new Vector3(pos.x, 0, pos.y);
-        tile.transform.localRotation = Quaternion.identity;
+        tile.transform.localRotation = rotation;
 
         return tile;
     }
@@ -66,7 +73,106 @@ public class WorldGenerator : Singleton<WorldGenerator>
         return player;
     }
 
-    public MapTile GetPrefabForCellType(CellType type)
+    private MapTile GetWallTile(Level level, Vector2Int pos, ref Quaternion rotation)
+    {
+        int count = 0;
+
+        if (level.SafeLookEdges(pos.x - 1, pos.y) == CellType.Wall)
+        {
+            count++;
+        }
+        if (level.SafeLookEdges(pos.x + 1, pos.y) == CellType.Wall)
+        {
+            count++;
+        }
+        if (level.SafeLookEdges(pos.x, pos.y - 1) == CellType.Wall)
+        {
+            count++;
+        }
+        if (level.SafeLookEdges(pos.x, pos.y + 1) == CellType.Wall)
+        {
+            count++;
+        }
+
+        if (count == 4)
+        {
+            return WallPrefabCross;
+        }
+        else if (count == 3)
+        {
+            if (level.SafeLookEdges(pos.x - 1, pos.y) != CellType.Wall)
+            {
+                rotation = Quaternion.Euler(0.0f, 270.0f, 0.0f);
+            }
+            else if (level.SafeLookEdges(pos.x + 1, pos.y) != CellType.Wall)
+            {
+                rotation = Quaternion.Euler(0.0f, 90.0f, 0.0f);
+            }
+            else if (level.SafeLookEdges(pos.x, pos.y - 1) != CellType.Wall)
+            {
+                rotation = Quaternion.Euler(0.0f, 180.0f, 0.0f);
+            }
+            else if (level.SafeLookEdges(pos.x, pos.y + 1) != CellType.Wall)
+            {
+                rotation = Quaternion.Euler(0.0f, 0.0f, 0.0f);
+            }
+
+            return WallPrefabT;
+        }
+        else if (count == 2)
+        {
+            if ((level.SafeLookEdges(pos.x - 1, pos.y) != CellType.Wall) && (level.SafeLookEdges(pos.x + 1, pos.y) != CellType.Wall))
+            {
+                rotation = Quaternion.Euler(0.0f, 90.0f, 0.0f);
+                return WallPrefabStraight;
+            }
+            else if ((level.SafeLookEdges(pos.x, pos.y - 1) != CellType.Wall) && (level.SafeLookEdges(pos.x, pos.y + 1) != CellType.Wall))
+            {
+                rotation = Quaternion.Euler(0.0f, 0.0f, 0.0f);
+                return WallPrefabStraight;
+            }
+            else
+            {
+                if ((level.SafeLookEdges(pos.x - 1, pos.y) != CellType.Wall) && (level.SafeLookEdges(pos.x, pos.y - 1) != CellType.Wall))
+                {
+                    rotation = Quaternion.Euler(0.0f, 270.0f, 0.0f);
+                }
+                else if ((level.SafeLookEdges(pos.x + 1, pos.y) != CellType.Wall) && (level.SafeLookEdges(pos.x, pos.y - 1) != CellType.Wall))
+                {
+                    rotation = Quaternion.Euler(0.0f, 180.0f, 0.0f);
+                }
+                else if ((level.SafeLookEdges(pos.x + 1, pos.y) != CellType.Wall) && (level.SafeLookEdges(pos.x + 1, pos.y) != CellType.Wall))
+                {
+                    rotation = Quaternion.Euler(0.0f, 90.0f, 0.0f);
+                }
+
+                return WallPrefabCorner;
+            }
+        }
+        else
+        {
+            if (level.SafeLookEdges(pos.x - 1, pos.y) == CellType.Wall)
+            {
+                rotation = Quaternion.Euler(0.0f, 180.0f, 0.0f);
+            }
+            else if (level.SafeLookEdges(pos.x + 1, pos.y) == CellType.Wall)
+            {
+                rotation = Quaternion.Euler(0.0f, 0.0f, 0.0f);
+            }
+            else if (level.SafeLookEdges(pos.x, pos.y - 1) == CellType.Wall)
+            {
+                rotation = Quaternion.Euler(0.0f, 90.0f, 0.0f);
+            }
+            else if (level.SafeLookEdges(pos.x, pos.y + 1) == CellType.Wall)
+            {
+                rotation = Quaternion.Euler(0.0f, 270.0f, 0.0f);
+            }
+
+            return WallPrefabEnd;
+        }
+    }
+
+    public MapTile GetPrefabForCellType(Level level, CellType type, Vector2Int pos, ref Quaternion rotation)
     {
         switch (type)
         {
@@ -74,7 +180,7 @@ public class WorldGenerator : Singleton<WorldGenerator>
             case CellType.Corridor:
                 return (UnityEngine.Random.Range(0, 2) == 0 ? FloorPrefab : FloorPrefabAlternative);
             case CellType.Wall:
-                return WallPrefab;
+                return GetWallTile(level, pos, ref rotation);
             case CellType.Entrance:
                 return EntrancePrefab;
             case CellType.Exit:

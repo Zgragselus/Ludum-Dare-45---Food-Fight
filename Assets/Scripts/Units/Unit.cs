@@ -35,6 +35,8 @@ public abstract class Unit : MonoBehaviour
     void Start()
     {
         kAnimationsInvMaxLength = 1.0f / kAnimationsMaxLength;
+
+        transform.localScale = Vector3.one * 0.5f;
     }
     
     protected void SubmitMoveAction(Vector2Int direction)
@@ -93,7 +95,7 @@ public abstract class Unit : MonoBehaviour
             tmp.y = Mathf.Sin(_lerpPosition * Mathf.PI) * AnimationJumpHeight;
 
             transform.position = tmp;
-            transform.localScale = Vector3.one * (1.0f + Mathf.Sin(Easing.EaseInOut(_lerpPosition) * Mathf.PI) * AnimationScaleFactor);
+            transform.localScale = Vector3.one * (0.5f + Mathf.Sin(Easing.EaseInOut(_lerpPosition) * Mathf.PI) * AnimationScaleFactor * 0.5f);
 
             _lerpPosition += Time.deltaTime * kAnimationsInvMaxLength;
             if (_lerpPosition > 1.0f)

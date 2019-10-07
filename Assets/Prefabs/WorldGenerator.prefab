@@ -55,6 +55,16 @@ MonoBehaviour:
     type: 3}
   ExitPrefab: {fileID: 4982105884748908114, guid: 755e0b471d36e6f4588d698638e6028d,
     type: 3}
+  WallPrefabEnd: {fileID: 8446380138825426139, guid: f1b4ccf34ee767c42b676a6905ce9543,
+    type: 3}
+  WallPrefabStraight: {fileID: 1163929837911688857, guid: f84f0a702271b294d8a20e5dd6fc656c,
+    type: 3}
+  WallPrefabCorner: {fileID: 8844268030006004695, guid: 871842edcefce4a458aea11175b9cb66,
+    type: 3}
+  WallPrefabT: {fileID: 8807908451120453726, guid: 431b0983c96161d4cb53aaa6edf5837a,
+    type: 3}
+  WallPrefabCross: {fileID: 3887745452428057080, guid: f32f521c393528240978af67b19595cb,
+    type: 3}
   Enemy01: {fileID: 2037282259346413277, guid: 754ec979c1f7a0f4cba26a3278c24dca, type: 3}
   Boss: {fileID: 2037282259346413277, guid: b67047e5476754f4aa0260e4bca915b0, type: 3}
   Powerup01: {fileID: 5185197460216195871, guid: 2dce08dbb202b894f8676a62cd27a774,
