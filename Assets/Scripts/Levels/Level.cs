@@ -318,6 +318,10 @@ public class Level : ILevel
         {
             ActiveUnits.Remove(unit);
         }
+        if (unit.IsBoss)
+        {
+            GameManager.Instance.Win();
+        }
         Debug.Log($"Killed {unit.gameObject.name}");
         GameObject.Destroy(unit.gameObject, .5f);
     }
