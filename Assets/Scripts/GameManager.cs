@@ -153,13 +153,17 @@ public class GameManager : Singleton<GameManager>
 
     public void Win()
     {
+        WinCanvas.SetActive(true);
     }
 
     internal void Lose()
     {
+        LoseCanvas.SetActive(true);
     }
 
     public bool IsStarted = false;
+
+    public GameObject HitPrefab;
 
     private void Update()
     {
@@ -175,6 +179,11 @@ public class GameManager : Singleton<GameManager>
 
         DamageText.text = CurrentPlayer.Damage.ToString();
         HpText.text = CurrentPlayer.Health.ToString();
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            Application.Quit();
+        }
     }
 
     public void StepCurrentLevel()

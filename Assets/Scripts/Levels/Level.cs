@@ -319,7 +319,7 @@ public class Level : ILevel
             ActiveUnits.Remove(unit);
         }
         Debug.Log($"Killed {unit.gameObject.name}");
-        GameObject.Destroy(unit.gameObject, 5);
+        GameObject.Destroy(unit.gameObject, .5f);
     }
 
     public void DoActions(List<(Unit, Vector2Int, ActionType type, object payload)> results)

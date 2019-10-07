@@ -11,7 +11,7 @@ public class Player : Unit
     {
         base.Update();
 
-        if (!GameManager.Instance.IsStarted)
+        if (!GameManager.Instance.IsStarted || IsDead)
         {
             return;
         }

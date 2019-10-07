@@ -33,7 +33,7 @@ public abstract class Unit : MonoBehaviour
 
     public bool IsBoss;
 
-    public bool IsDead => Health == 0;
+    public bool IsDead => Health <= 0;
 
     void Start()
     {
@@ -145,7 +145,7 @@ public abstract class Unit : MonoBehaviour
 
     internal void Pickup(PickupObject obj)
     {
-        obj.Consume();
+        obj.Consume(this);
     }
 
     internal void Attack()
@@ -159,6 +159,9 @@ public abstract class Unit : MonoBehaviour
         {
             RightHand.GetComponent<HandController>().Hit();
         }
+
+        var go = GameObject.Instantiate(GameManager.Instance.HitPrefab, GameManager.Instance.CurrentLevel.WorldParent.position + new Vector3(CurrentPosition.x + CurrentDirection.x, 0, CurrentPosition.y + CurrentDirection.y), Quaternion.identity);
+        GameObject.Destroy(go, 1);
     }
 
     internal void Die()

@@ -14,9 +14,10 @@ public class PickupObject : MonoBehaviour
         _anim = GetComponent<Animation>();
     }
 
-    public void Consume()
+    public void Consume(Unit p)
     {
         _anim.Play("PowerupPickedup");
+        p.Health += HealthAdd;
         GameObject.Destroy(gameObject, 3f);
     }
 }
