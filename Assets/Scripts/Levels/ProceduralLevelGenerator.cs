@@ -89,9 +89,9 @@ public class ProceduralLevelGenerator
     {
         List<Vector2Int> candidates = new List<Vector2Int>();
 
-        for (int i = 0; i < level.Size; i++)
+        for (int i = 1; i < level.Size - 1; i++)
         {
-            for (int j = 0; j < level.Size; j++)
+            for (int j = 1; j < level.Size - 1; j++)
             {
                 if (level.SafeLook(i, j) == CellType.Wall &&
                     (level.SafeLook(i + 1, j) == CellType.Floor ||
@@ -106,6 +106,17 @@ public class ProceduralLevelGenerator
 
         int entrance = UnityEngine.Random.Range(0, candidates.Count);
 
+        for (int i = -1; i <= 1; i++)
+        {
+            for (int j = -1; j <= 1; j++)
+            {
+                if (level.Map[candidates[entrance].x + i, candidates[entrance].y + j] == CellType.Empty)
+                {
+                    level.Map[candidates[entrance].x + i, candidates[entrance].y + j] = CellType.Wall;
+                }
+            }
+        }
+
         level.Map[candidates[entrance].x, candidates[entrance].y] = CellType.Entrance;
     }
 
@@ -113,9 +124,9 @@ public class ProceduralLevelGenerator
     {
         List<Vector2Int> candidates = new List<Vector2Int>();
 
-        for (int i = 0; i < level.Size; i++)
+        for (int i = 1; i < level.Size - 1; i++)
         {
-            for (int j = 0; j < level.Size; j++)
+            for (int j = 1; j < level.Size - 1; j++)
             {
                 if (level.SafeLook(i, j) == CellType.Wall &&
                     (level.SafeLook(i + 1, j) == CellType.Floor ||
@@ -129,6 +140,17 @@ public class ProceduralLevelGenerator
         }
 
         int exit = UnityEngine.Random.Range(0, candidates.Count);
+
+        for (int i = -1; i <= 1; i++)
+        {
+            for (int j = -1; j <= 1; j++)
+            {
+                if (level.Map[candidates[exit].x + i, candidates[exit].y + j] == CellType.Empty)
+                {
+                    level.Map[candidates[exit].x + i, candidates[exit].y + j] = CellType.Wall;
+                }
+            }
+        }
 
         level.Map[candidates[exit].x, candidates[exit].y] = CellType.Exit;
     }
