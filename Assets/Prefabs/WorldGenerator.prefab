@@ -47,6 +47,8 @@ MonoBehaviour:
     type: 3}
   FloorPrefab: {fileID: 8446380138825426139, guid: 6741639453b1f9546af506f7ac9152a2,
     type: 3}
+  FloorPrefabAlternative: {fileID: 6595892209667133991, guid: f504bc2039811b743b5bf3b5cb389074,
+    type: 3}
   WallPrefab: {fileID: -6053070855340700882, guid: 0fa3ad57fa233d247aed51cbeb57b7c2,
     type: 3}
   EntrancePrefab: {fileID: 9108758380464697729, guid: 9a0c89c500649384f871891f12af6144,

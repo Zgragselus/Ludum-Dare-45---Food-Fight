@@ -15,6 +15,7 @@ public class WorldGenerator : Singleton<WorldGenerator>
     public Player PlayerPrefab;
 
     public MapTile FloorPrefab;
+    public MapTile FloorPrefabAlternative;
     public MapTile WallPrefab;
     public MapTile EntrancePrefab;
     public MapTile ExitPrefab;
@@ -71,7 +72,7 @@ public class WorldGenerator : Singleton<WorldGenerator>
         {
             case CellType.Floor:
             case CellType.Corridor:
-                return FloorPrefab;
+                return (UnityEngine.Random.Range(0, 2) == 0 ? FloorPrefab : FloorPrefabAlternative);
             case CellType.Wall:
                 return WallPrefab;
             case CellType.Entrance:

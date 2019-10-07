@@ -527,6 +527,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Target: {fileID: 0}
+  Factor: 2
 --- !u!1001 &1880344494
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -594,6 +595,12 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3851992958364935536, guid: 01c8efaaa3467934e9c1f3b5c9a7f29d,
+        type: 3}
+      propertyPath: FloorPrefabAlternative
+      value: 
+      objectReference: {fileID: 6595892209667133991, guid: f504bc2039811b743b5bf3b5cb389074,
+        type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 01c8efaaa3467934e9c1f3b5c9a7f29d, type: 3}
 --- !u!1 &2060874598
