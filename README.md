@@ -1,4 +1,4 @@
-# Ludum-Dare-45---Food-Fight
+# Ludum Dare 45 - Food Fight
 
 To Download the game and run it - please visit https://zgragselus.itch.io/food-fight
 
